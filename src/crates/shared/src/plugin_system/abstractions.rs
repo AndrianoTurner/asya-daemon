@@ -12,10 +12,7 @@ use super::PluginEvent;
 ///
 /// `sender` ptr must not be cosumed.
 /// `event` ptr will be consumed and rust frees them.
-pub async unsafe fn send_plugin_event_checked(
-    sender: String,
-    event: String,
-) {
+pub async unsafe fn send_plugin_event_checked(sender: String, event: String) {
     let general_event = PluginEvent {
         sender,
         data: event,
