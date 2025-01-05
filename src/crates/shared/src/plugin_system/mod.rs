@@ -1,5 +1,4 @@
 use libloading::Library;
-use tracing::*;
 use plugin_interface::{EventState, PluginInformation, State};
 use serde::Serialize;
 use std::{
@@ -12,12 +11,14 @@ use std::{
     time::Duration,
 };
 use tokio::sync::{mpsc::Receiver, Mutex};
+use tracing::*;
 
 use crate::{
     configuration::{self, ConfigFieldType, CONFIG},
     event_system,
 };
 
+mod abstractions;
 mod api_callbacks;
 
 // todo: редизайн типов чтобы такой хуеты как с Library не было
@@ -159,23 +160,14 @@ async unsafe fn check_request(plugin_state: ptr::NonNull<State>) {
 
 async unsafe fn check_event(plugin_state: ptr::NonNull<State>, info: &mut PluginRuntimeInfo) {
     if let Some(published_event) = ptr::NonNull::new(plugin_state.read().published_event) {
-        let published_event_data = CStr::from_ptr(published_event.as_ptr()).to_str();
-        match published_event_data {
-            Ok(str_data) => {
-                let general_event = PluginEvent {
-                    sender: CStr::from_ptr(info.plugin_information.name)
-                        .to_str()
-                        .unwrap() /* i think, plugin name will be not changed due asya
-                        lifetime, so that we don't have to check this every time. */
-                        .to_string(),
-                    data: str_data.to_string(),
-                };
-                event_system::publish(general_event).await;
-            }
-            Err(_) => {
-                warn!("Plugin sent an event, that cannot be represent as a valid Utf8 string. Event wasn'n published.")
-            }
-        }
+        let (event_string, sender_string) = match abstractions::safe_cast_name_event(
+            info.plugin_information.name,
+            published_event.as_ptr(),
+        ) {
+            Some(value) => value,
+            None => return,
+        };
+        _ = abstractions::send_plugin_event_checked(sender_string, event_string).await;
     }
 }
 

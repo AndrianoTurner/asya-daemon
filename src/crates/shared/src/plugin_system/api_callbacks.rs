@@ -1,17 +1,18 @@
 use lazy_static::lazy_static;
 use std::ffi::{c_char, CString};
 
-use tracing::*;
 use plugin_interface::ApiCallbacks;
+use tracing::*;
 
 use crate::event_system;
 
-use super::ReadableRequest;
+use super::{abstractions, ReadableRequest};
 
 pub fn get_api() -> ApiCallbacks {
     ApiCallbacks {
         send_human_request,
         subscribe_to_event,
+        publish_event,
     }
 }
 
@@ -41,5 +42,17 @@ unsafe extern "C" fn subscribe_to_event(callback: unsafe extern "C" fn(*const c_
             let cstr = &CString::new(res).unwrap();
             callback(cstr.as_ptr());
         }
+    });
+}
+
+unsafe extern "C" fn publish_event(sender_ptr: *const c_char, event_ptr: *mut c_char) {
+    let (event_string, sender_string) =
+        match abstractions::safe_cast_name_event(sender_ptr, event_ptr) {
+            Some(value) => value,
+            None => return,
+        };
+
+    RUNTIME.spawn(async move {
+        abstractions::send_plugin_event_checked(event_string, sender_string).await
     });
 }
