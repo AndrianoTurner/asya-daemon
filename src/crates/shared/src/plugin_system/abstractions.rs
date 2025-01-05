@@ -8,11 +8,6 @@ use crate::event_system;
 
 use super::PluginEvent;
 
-pub enum PluginEventError {
-    SenderIncorrect,
-    EventIncorrect,
-}
-
 /// Sends event from plugin to event bus as `String`.
 ///
 /// `sender` ptr must not be cosumed.
@@ -20,14 +15,12 @@ pub enum PluginEventError {
 pub async unsafe fn send_plugin_event_checked(
     sender: String,
     event: String,
-) -> Result<(), PluginEventError> {
+) {
     let general_event = PluginEvent {
         sender,
         data: event,
     };
     event_system::publish(general_event).await;
-
-    Ok(())
 }
 
 /// Cast chars from C whithout owning them.
