@@ -46,11 +46,11 @@ unsafe extern "C" fn subscribe_to_event(callback: unsafe extern "C" fn(*const c_
 }
 
 unsafe extern "C" fn publish_event(sender_ptr: *const c_char, event_ptr: *mut c_char) {
-    let (event_string, sender_string) =
-        match abstractions::safe_cast_name_event(sender_ptr, event_ptr) {
-            Some(value) => value,
-            None => return,
-        };
+    let Some((event_string, sender_string)) =
+        abstractions::safe_cast_name_event(sender_ptr, event_ptr)
+    else {
+        return;
+    };
 
     RUNTIME.spawn(async move {
         abstractions::send_plugin_event_checked(event_string, sender_string).await

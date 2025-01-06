@@ -42,24 +42,21 @@ pub unsafe fn safe_cast_name_event(
     sender_ptr: *const i8,
     event_ptr: *mut i8,
 ) -> Option<(String, String)> {
-    let sender_string = if let Some(sender) = cstring_safety_cast(sender_ptr) {
-        sender
-    } else {
+    let Some(sender) = cstring_safety_cast(sender_ptr) else {
         warn!(
             "Some plugin has send event with corrupted 'sender_ptr'. 
                 The pointer must be valid and must represent a valit UTF-8 string"
         );
         return None;
     };
-    let event_string = if let Some(sender) = cstring_safety_consume(event_ptr) {
-        sender
-    } else {
+
+    let Some(event) = cstring_safety_consume(event_ptr) else {
         warn!(
             "Plugin '{}' has send event with corrupted 'event_ptr'. 
                 The pointer must be valid and must represent a valit UTF-8 string",
-            sender_string
+            sender
         );
         return None;
     };
-    Some((event_string, sender_string))
+    Some((event, sender))
 }
