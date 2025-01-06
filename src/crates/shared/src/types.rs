@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 pub enum AiRecognizeMethod {
     Groq,
     AltaS,
+    Ollama,
     #[default]
     None,
 }
