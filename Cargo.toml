@@ -5,7 +5,8 @@ members = [
   "src/crates/shared",
   "src/crates/macros",
   "src/crates/usecases",
-  "src/crates/macros",
+  "src/crates/macros", 
+  "src/crates/plugin_system",
 ]
 
 resolver = "2"
@@ -25,6 +26,7 @@ services = { path = "src/crates/services" }
 shared = { path = "src/crates/shared" }
 macros = { path = "src/crates/macros" }
 usecases = { path = "src/crates/usecases" }
+plugin_system = { path = "src/crates/plugin_system" }
 
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }

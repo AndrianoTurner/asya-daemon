@@ -1,4 +1,4 @@
-use shared::{event_system, plugin_system};
+use shared::event_system;
 use tokio::{join, sync::Mutex};
 use tracing::info;
 

@@ -3,7 +3,7 @@ use tracing::*;
 use serde::Serialize;
 use services::llm_api;
 use shared::event_system;
-use shared::plugin_system::ReadableRequest;
+use plugin_system::ReadableRequest;
 use std::sync::Arc;
 use tokio::task;
 

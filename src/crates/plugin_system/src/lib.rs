@@ -13,7 +13,7 @@ use std::{
 use tokio::sync::{mpsc::Receiver, Mutex};
 use tracing::*;
 
-use crate::{
+use shared::{
     configuration::{self, ConfigFieldType, CONFIG},
     event_system,
 };

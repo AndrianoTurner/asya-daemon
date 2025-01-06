@@ -359,6 +359,7 @@ dependencies = [
  "macros",
  "merge-struct",
  "multimap",
+ "plugin_system",
  "queues",
  "rand",
  "serde",
@@ -1505,9 +1506,9 @@ dependencies = [
 
 [[package]]
 name = "mlua"
-version = "0.4.2"
+version = "0.5.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f778acf55b288d9e0b81e7189988766499f4ec7f774b0965e30140295221e01d"
+checksum = "dd448d3e7018f2ff38dd732a374045f5b037eb4ee477d9241d9bb8c209528c1c"
 dependencies = [
  "bstr",
  "cc",
@@ -1518,9 +1519,9 @@ dependencies = [
 
 [[package]]
 name = "mlua_serde"
-version = "0.5.1"
+version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b0fb3d10316c8ddb895f8fc24d4b9ecbf778257aab32f3cde6529a3eefd28788"
+checksum = "0e7add20c65a2526221d66a1d7f0cb5396532cd37235333d77867529f8fcc585"
 dependencies = [
  "mlua",
  "serde",
@@ -1790,6 +1791,21 @@ name = "plugin_interface"
 version = "0.1.0"
 
 [[package]]
+name = "plugin_system"
+version = "0.1.0"
+dependencies = [
+ "lazy_static",
+ "libloading",
+ "macros",
+ "plugin_interface",
+ "serde",
+ "serde_json",
+ "shared",
+ "tokio",
+ "tracing",
+]
+
+[[package]]
 name = "powerfmt"
 version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1806,9 +1822,9 @@ dependencies = [
 
 [[package]]
 name = "prettyplease"
-version = "0.2.25"
+version = "0.2.27"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "64d1ec885c64d0457d564db4ec299b2dae3f9c02808b8ad9c3a089c591b18033"
+checksum = "483f8c21f64f3ea09fe0f30f5d48c3e8eefe5dac9129f0075f76593b4c1da705"
 dependencies = [
  "proc-macro2",
  "syn",
@@ -2963,6 +2979,7 @@ dependencies = [
  "mlua",
  "multimap",
  "parse-display",
+ "plugin_system",
  "queues",
  "rand",
  "schemars",

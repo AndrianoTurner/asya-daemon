@@ -10,6 +10,7 @@ path = "./src/lib.rs"
 services = { path = "../services/" }
 shared = { path = "../shared/" }
 macros = { path = "../macros/" }
+plugin_system = { path = "../plugin_system/" }
 
 schemars = "0.8.21"
 hyper = { version = "1.4.1", features = ["full"] }
