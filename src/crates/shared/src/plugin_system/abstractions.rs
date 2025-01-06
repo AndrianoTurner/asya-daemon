@@ -46,8 +46,8 @@ pub unsafe fn safe_cast_name_event(
         sender
     } else {
         warn!(
-            "Some plugin send event, but send corrupted 'sender_ptr'. 
-                Pointer must be valid and must represent a valit UTF-8 string"
+            "Some plugin has send event with corrupted 'sender_ptr'. 
+                The pointer must be valid and must represent a valit UTF-8 string"
         );
         return None;
     };
