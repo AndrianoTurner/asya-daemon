@@ -55,8 +55,8 @@ pub unsafe fn safe_cast_name_event(
         sender
     } else {
         warn!(
-            "Plugin '{}' send event, but send corrupted 'event_ptr'. 
-                Pointer must be valid and must represent a valit UTF-8 string",
+            "Plugin '{}' has send event with corrupted 'event_ptr'. 
+                The pointer must be valid and must represent a valit UTF-8 string",
             sender_string
         );
         return None;
