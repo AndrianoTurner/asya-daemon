@@ -18,7 +18,7 @@ use tracing::*;
 
 use shared::{
     configuration::{self, ConfigFieldType, CONFIG},
-    event_system,
+    event_system, traits::ReadableRequest,
 };
 
 mod abstractions;
@@ -40,16 +40,17 @@ pub struct PluginEvent {
 }
 
 /// Loads plugins from path from config.
-pub fn load_plugins(receiver: Mutex<Receiver<String>>) {
+#[no_mangle]
+pub extern "C" fn load_plugins(receiver: Mutex<Receiver<String>>) {
     unsafe {
         thread::spawn(move || {
             // wip
-            for resolver in &CONFIG.plugins.custom_resolvers {
-                info!("Found custom resolver: {resolver}");
-                _ = process::Command::new(format!("{}{}", CONFIG.plugins.plugins_folder, resolver))
-                    .spawn();
-            }
-
+            // for resolver in &CONFIG.plugins.custom_resolvers {
+            //     info!("Found custom resolver: {resolver}");
+            //     _ = process::Command::new(format!("{}{}", CONFIG.plugins.plugins_folder, resolver))
+            //         .spawn();
+            // }
+            //
             let rt = tokio::runtime::Runtime::new().unwrap();
             rt.block_on(async {
                 let libraries_path = find_plugins();
@@ -155,9 +156,6 @@ async unsafe fn check_event_for_publish(info: &mut PluginRuntimeInfo) {
         free_memory(info);
     }
 }
-
-#[derive(Debug, Clone, Serialize)]
-pub struct ReadableRequest(pub String);
 
 async unsafe fn check_request(plugin_state: ptr::NonNull<State>) {
     if let Some(request_ptr) = ptr::NonNull::new(plugin_state.read().human_request) {

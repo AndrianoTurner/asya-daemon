@@ -3,6 +3,9 @@ name = "plugin_system"
 version.workspace = true
 edition.workspace = true
 
+[lib]
+crate-type = ["cdylib"]
+
 [dependencies]
 shared = { path = "../shared/" }
 macros = { path = "../macros/" }

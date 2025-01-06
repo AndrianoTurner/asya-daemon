@@ -1,3 +1,4 @@
+use shared::traits::ReadableRequest;
 use lazy_static::lazy_static;
 use std::ffi::{c_char, CString};
 
@@ -6,7 +7,7 @@ use tracing::*;
 
 use crate::event_system;
 
-use super::{abstractions, ReadableRequest};
+use super::abstractions;
 
 pub fn get_api() -> ApiCallbacks {
     ApiCallbacks {
