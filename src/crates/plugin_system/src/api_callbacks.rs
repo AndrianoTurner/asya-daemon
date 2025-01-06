@@ -20,6 +20,7 @@ lazy_static! {
     static ref RUNTIME: tokio::runtime::Runtime = tokio::runtime::Runtime::new().unwrap();
 }
 
+#[no_mangle]
 unsafe extern "C" fn send_human_request(human: *mut c_char) {
     let from_raw = CString::from_raw(human);
     RUNTIME.spawn(async move {
@@ -33,6 +34,7 @@ unsafe extern "C" fn send_human_request(human: *mut c_char) {
     });
 }
 
+#[no_mangle]
 unsafe extern "C" fn subscribe_to_event(callback: unsafe extern "C" fn(*const c_char)) {
     RUNTIME.spawn(async move {
         loop {
@@ -45,6 +47,7 @@ unsafe extern "C" fn subscribe_to_event(callback: unsafe extern "C" fn(*const c_
     });
 }
 
+#[no_mangle]
 unsafe extern "C" fn publish_event(sender_ptr: *const c_char, event_ptr: *mut c_char) {
     let Some((event_string, sender_string)) =
         abstractions::safe_cast_name_event(sender_ptr, event_ptr)
