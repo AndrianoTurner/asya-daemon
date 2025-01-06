@@ -83,6 +83,10 @@ pub struct Plugins {
     #[property(default("plugins".to_string()))]
     pub plugins_folder: String,
 
+    /// Custom plugin resolvers.
+    #[property(default)]
+    pub custom_resolvers: Vec<String>,
+
     #[property(default)]
     pub config: HashMap<String, HashMap<String, ConfigFieldType>>,
 }

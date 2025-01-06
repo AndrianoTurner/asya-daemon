@@ -10,7 +10,10 @@ use std::{
     thread,
     time::Duration,
 };
-use tokio::sync::{mpsc::Receiver, Mutex};
+use tokio::{
+    process,
+    sync::{mpsc::Receiver, Mutex},
+};
 use tracing::*;
 
 use shared::{
@@ -40,6 +43,11 @@ pub struct PluginEvent {
 pub fn load_plugins(receiver: Mutex<Receiver<String>>) {
     unsafe {
         thread::spawn(move || {
+            // wip 
+            for resolver in &CONFIG.plugins.custom_resolvers {
+                _ = process::Command::new(resolver).spawn();
+            }
+
             let rt = tokio::runtime::Runtime::new().unwrap();
             rt.block_on(async {
                 let libraries_path = find_plugins();
