@@ -1,12 +1,13 @@
 use alta_s_api::send_to_altas;
 use groq_api::send_to_groq;
+use ollama_api::send_to_ollama;
 use tracing::*;
 use reqwest::Client;
 use shared::{configuration::CONFIG, types::AiRecognizeMethod};
 
 mod alta_s_api;
 mod groq_api;
-
+mod ollama_api;
 // todo: покрыть все ошибки, а не те которые мне по кайфу щас
 #[derive(Debug)]
 pub enum AiRequestError {
@@ -14,6 +15,7 @@ pub enum AiRequestError {
     GroqRequest,
     AltaSUrl,
     AltaSRequest,
+    OllamaRequest
 }
 
 // todo: rewrite to result
@@ -29,6 +31,7 @@ pub async fn send_request(req: String) -> Result<String, AiRequestError> {
             }
         }
         AiRecognizeMethod::AltaS => send_to_altas(req).await,
+        AiRecognizeMethod::Ollama => send_to_ollama(&req).await,
         AiRecognizeMethod::None => Err(AiRequestError::GroqRequest), // nothing for recognize, so just return command
     }
 }
