@@ -80,7 +80,7 @@ pub struct Config {
 #[property(name(PluginsProperty), derive(Deserialize, Default, Clone))]
 pub struct Plugins {
     /// Folder which contains plugins.
-    #[property(default("plugins".to_string()))]
+    #[property(default("plugins/".to_string()))]
     pub plugins_folder: String,
 
     /// Custom plugin resolvers.

@@ -43,9 +43,11 @@ pub struct PluginEvent {
 pub fn load_plugins(receiver: Mutex<Receiver<String>>) {
     unsafe {
         thread::spawn(move || {
-            // wip 
+            // wip
             for resolver in &CONFIG.plugins.custom_resolvers {
-                _ = process::Command::new(resolver).spawn();
+                info!("Found custom resolver: {resolver}");
+                _ = process::Command::new(format!("{}{}", CONFIG.plugins.plugins_folder, resolver))
+                    .spawn();
             }
 
             let rt = tokio::runtime::Runtime::new().unwrap();
