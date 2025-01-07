@@ -5,13 +5,13 @@ use tracing::warn;
 
 use crate::event_system;
 
-use super::PluginEvent;
+use super::{Event, PluginEvent, Sender};
 
 /// Sends event from plugin to event bus as `String`.
 ///
 /// `sender` ptr must not be cosumed.
 /// `event` ptr will be consumed and rust frees them.
-pub async unsafe fn send_plugin_event_checked(sender: String, event: String) {
+pub async unsafe fn send_plugin_event_checked(sender: Sender, event: Event) {
     let general_event = PluginEvent {
         sender,
         data: event,
@@ -36,7 +36,7 @@ pub unsafe fn cstring_safety_cast(chars: *const c_char) -> Option<String> {
 pub unsafe fn safe_cast_name_event(
     sender_ptr: *const i8,
     event_ptr: *const i8,
-) -> Option<(String, String)> {
+) -> Option<(Sender, Event)> {
     let Some(sender) = cstring_safety_cast(sender_ptr) else {
         warn!(
             "Some plugin has send event with corrupted 'sender_ptr'. 
@@ -53,5 +53,5 @@ pub unsafe fn safe_cast_name_event(
         );
         return None;
     };
-    Some((sender, event))
+    Some((sender.into(), event.into()))
 }

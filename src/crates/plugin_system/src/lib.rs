@@ -1,3 +1,4 @@
+use derive_more::derive::{Deref, From, Into};
 use libloading::Library;
 use plugin_interface::{EventState, PluginInformation, State};
 use serde::Serialize;
@@ -29,11 +30,19 @@ struct PluginRuntimeInfo {
     state: *mut State,
 }
 
+#[derive(Debug, Serialize, Clone, Deref, From, Into)]
+#[serde(into = "String")]
+pub struct Sender(pub String);
+
+#[derive(Debug, Serialize, Clone, Deref, From, Into)]
+#[serde(into = "String")]
+pub struct Event(pub String);
+
 /// Event publishing from plugins.
 #[derive(Debug, Serialize)]
 pub struct PluginEvent {
-    sender: String,
-    data: String,
+    sender: Sender,
+    data: Event,
 }
 
 /// Loads plugins from path from config.
