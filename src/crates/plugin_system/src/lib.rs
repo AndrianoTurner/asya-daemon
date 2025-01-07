@@ -160,7 +160,7 @@ async unsafe fn check_request(plugin_state: ptr::NonNull<State>) {
 
 async unsafe fn check_event(plugin_state: ptr::NonNull<State>, info: &mut PluginRuntimeInfo) {
     if let Some(published_event) = ptr::NonNull::new(plugin_state.read().published_event) {
-        let (event_string, sender_string) = match abstractions::safe_cast_name_event(
+        let (sender_string, event_string) = match abstractions::safe_cast_name_event(
             info.plugin_information.name,
             published_event.as_ptr(),
         ) {

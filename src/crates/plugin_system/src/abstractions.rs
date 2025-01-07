@@ -1,6 +1,5 @@
 use std::ffi::c_char;
 use std::ffi::CStr;
-use std::ffi::CString;
 
 use tracing::warn;
 
@@ -28,19 +27,13 @@ pub unsafe fn cstring_safety_cast(chars: *const c_char) -> Option<String> {
     }
 }
 
-/// Consumes chars from C
-pub unsafe fn cstring_safety_consume(chars: *mut c_char) -> Option<String> {
-    match CString::from_raw(chars).to_str() {
-        Ok(string) => Some(string.to_string()),
-        Err(_utferr) => None,
-    }
-}
-
 /// Just alias to `abstractions::cstring_safety_cast` and `abstractions::cstring_safety_consume`
 /// for event and name
+///
+/// returns (sender, event)
 pub unsafe fn safe_cast_name_event(
     sender_ptr: *const i8,
-    event_ptr: *mut i8,
+    event_ptr: *const i8,
 ) -> Option<(String, String)> {
     let Some(sender) = cstring_safety_cast(sender_ptr) else {
         warn!(
@@ -50,7 +43,7 @@ pub unsafe fn safe_cast_name_event(
         return None;
     };
 
-    let Some(event) = cstring_safety_consume(event_ptr) else {
+    let Some(event) = cstring_safety_cast(event_ptr) else {
         warn!(
             "Plugin '{}' has send event with corrupted 'event_ptr'. 
                 The pointer must be valid and must represent a valit UTF-8 string",
@@ -58,5 +51,5 @@ pub unsafe fn safe_cast_name_event(
         );
         return None;
     };
-    Some((event, sender))
+    Some((sender, event))
 }
