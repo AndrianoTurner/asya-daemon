@@ -27,6 +27,8 @@ pub unsafe fn cstring_safety_cast(chars: *const c_char) -> Option<String> {
     }
 }
 
+// TODO: refactor from tuple `(sender: String, name: String)` to tuple of structs: `(Sender(String), Event(String))`
+
 /// Just alias to `abstractions::cstring_safety_cast` and `abstractions::cstring_safety_consume`
 /// for event and name
 ///
