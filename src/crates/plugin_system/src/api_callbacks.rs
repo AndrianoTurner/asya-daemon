@@ -11,7 +11,7 @@ use super::{abstractions, ReadableRequest};
 pub fn get_api() -> ApiCallbacks {
     ApiCallbacks {
         send_human_request,
-        subscribe_to_event,
+        subscribe_to_events,
         publish_event,
     }
 }
@@ -35,7 +35,7 @@ unsafe extern "C" fn send_human_request(human: *mut c_char) {
 }
 
 #[no_mangle]
-unsafe extern "C" fn subscribe_to_event(callback: unsafe extern "C" fn(*const c_char)) {
+unsafe extern "C" fn subscribe_to_events(callback: unsafe extern "C" fn(*const c_char)) {
     RUNTIME.spawn(async move {
         loop {
             let (_, rx) = event_system::get_channel().await;

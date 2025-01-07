@@ -40,7 +40,7 @@ impl Default for State {
 #[derive(Clone, Copy)]
 pub struct ApiCallbacks {
     pub send_human_request: unsafe extern "C" fn(*mut c_char),
-    pub subscribe_to_event: unsafe extern "C" fn(unsafe extern "C" fn(*const c_char)),
+    pub subscribe_to_events: unsafe extern "C" fn(unsafe extern "C" fn(*const c_char)),
     pub publish_event: unsafe extern "C" fn(*const c_char, *mut c_char),
 }
 
