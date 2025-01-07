@@ -1,17 +1,9 @@
 use shared::event_system;
-use tokio::{
-    join,
-    sync::{mpsc::Receiver, Mutex},
-};
+use tokio::{join, sync::Mutex};
 use tracing::info;
 
 mod logging;
 mod preview;
-
-#[link(name = "plugin_system")]
-extern "C" {
-    fn load_plugins(receiver: Mutex<Receiver<String>>);
-}
 
 #[tokio::main]
 async fn main() {
@@ -25,9 +17,7 @@ async fn main() {
     preview::show_preview();
     logging::init_logging();
     event_system::init_event_dispatcher(sender).await;
-    unsafe {
-        load_plugins(Mutex::new(receiver));
-    }
+    plugin_system::load_plugins(Mutex::new(receiver));
     usecases::subscribe_for_plugins().await;
     let server_launching = server::start();
     info!("Bootstrapping");
