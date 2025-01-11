@@ -1,6 +1,5 @@
 use macros::Stringify;
 
-use serde::{Deserialize, Serialize};
 use tracing::*;
 
 use crate::scenarios::*;
@@ -58,9 +57,7 @@ pub enum Usecases {
 
 impl Usecases {
     pub fn stringify_all() -> String {
-        let strings = [
-            Usecases::stringify_one(),
-        ];
+        let strings = [Usecases::stringify_one()];
         let iter = strings.iter().map(|el| el.to_string() + "\n\n");
         String::from_iter(iter)
     }
