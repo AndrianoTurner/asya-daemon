@@ -15,7 +15,7 @@
     </br>
     get information about the status of your PC, update and troubleshoot problems.
     <br />
-    <a href="https://github.com/DmitryHudrich/asya-daemon/wiki"><strong>Explore the docs »</strong></a>
+    <a href="https://asya4u.github.io/wiki/"><strong>Explore the docs »</strong></a>
     <br />
     <br />
     <!-- <a href="https://github.com/asya4u/asya-daemon">View Demo</a>  //TODO -->
