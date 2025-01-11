@@ -1,5 +1,4 @@
 use libloading::Library;
-use tracing::*;
 use plugin_interface::{EventState, PluginInformation, State};
 use serde::Serialize;
 use std::{
@@ -12,6 +11,7 @@ use std::{
     time::Duration,
 };
 use tokio::sync::{mpsc::Receiver, Mutex};
+use tracing::*;
 
 use crate::{
     configuration::{self, ConfigFieldType, CONFIG},
@@ -109,9 +109,9 @@ async unsafe fn do_loop(plugins_data: &mut [PluginRuntimeInfo], receiver: Mutex<
     }
 }
 
-async unsafe fn check_event_for_send<'a>(
+async unsafe fn check_event_for_send(
     info: &mut PluginRuntimeInfo,
-    event_recv: &mut tokio::sync::MutexGuard<'a, Receiver<String>>,
+    event_recv: &mut tokio::sync::MutexGuard<'_, Receiver<String>>,
 ) {
     let event_callback = info.plugin_information.event_callback;
     let recieved_event = event_recv.recv().await;
