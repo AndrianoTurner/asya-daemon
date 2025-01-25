@@ -107,6 +107,10 @@ pub struct Ai {
     #[property(default)]
     pub alta_s_addr: String,
 
+    /// The address where the ollama server is hosted.
+    #[property(default)]
+    pub ollama_base_url: String, // Should this be an option?
+  
     // Maybe remove this? alta_s model always should launch automatically.
     #[property(default)]
     pub autolaunch_alta_s: bool,
