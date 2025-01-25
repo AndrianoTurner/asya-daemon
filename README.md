@@ -46,22 +46,22 @@
   * Debian-based
       ```sh
       sudo apt update
-      sudo apt install -y luajit pkg-config libssl-dev
+      sudo apt install -y lua5.4 pkg-config libssl-dev
       ```
       
   * Fedora 
       ```sh
-      sudo dnf install -y luajit pkgconf-pkg-config openssl-devel
+      sudo dnf install -y lua pkgconf-pkg-config openssl-devel
       ```
   * Arch-based
       ```sh
       sudo pacman -Syu
-      sudo pacman -S --noconfirm luajit pkgconf openssl
+      sudo pacman -S --noconfirm lua pkgconf openssl
       ```
   * macOS:
       ```sh
       brew update
-      brew install luajit pkg-config openssl
+      brew install lua pkg-config openssl
       ```
 ### Build
 ```sh
