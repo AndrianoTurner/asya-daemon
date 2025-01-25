@@ -1,41 +1,33 @@
 use reqwest::Client;
-use serde::Deserialize;
 use serde_json::json;
-
+use shared::{configuration, serde_extensions::get_json_value};
 use super::AiRequestError;
-
-#[derive(Deserialize)]
-struct OllamaResponse{
-    model : String,
-    created_at : String,
-    pub response: String,
-    done: bool,
-    context: Vec<u32>,
-    total_duration: usize,
-    load_duration: usize,
-    prompt_eval_count: usize,
-    prompt_eval_duration: usize,
-    eval_count: usize,
-    eval_duration: usize
-}
 
 pub async fn send_to_ollama(req: &str) -> Result<String, AiRequestError> {
     let http_client = Client::new();
     let data = json!({
-        "model" : "llama3.2",
-        "prompt" : req,
+        "model" : "mistral", // This should be configured
+        "prompt": req,
         "stream" : false,
     });
-    let response = http_client.post("http://localhost:11434/api/generate").json(&data).send().await;
+    let req_url = format!("{}/api/generate",configuration::CONFIG.ai.ollama_base_url.trim_end_matches("/"));
+    let response = http_client.post(&req_url).json(&data).send().await;
     match response {
         Ok(r) => {
-            if let Ok(data) = r.json::<OllamaResponse>().await{
-                Ok(data.response)
+            match r.text().await{
+                Ok(response) =>{
+                    get_json_value(&response, "response").ok_or(AiRequestError::OllamaRequest)
+                },
+                Err(e) => {
+                    tracing::error!("Error deserializing OllamaResponse: {e}!");
+                    Err(AiRequestError::OllamaRequest)
+                },
             }
-            else {
-                Err(AiRequestError::OllamaRequest)
-            }
+    
         },
-        Err(_) => Err(AiRequestError::OllamaRequest)
+        Err(e) => {
+            tracing::error!("OllamaError {e}");
+            Err(AiRequestError::OllamaRequest)
+        }
     }
 }
