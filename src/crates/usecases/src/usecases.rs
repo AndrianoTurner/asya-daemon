@@ -87,12 +87,8 @@ impl Usecases {
             }
             Usecases::OpenApp(app) => open_app::open(app).await,
             Usecases::Answer => geranal_answer::answer(userinput).await,
-            Usecases::Shutdown => {
-                do_dang(pc_mgmt::shutdown::shutdown).await;
-            }
-            Usecases::Reboot => {
-                do_dang(pc_mgmt::shutdown::reboot).await;
-            }
+            Usecases::Shutdown => do_dang(pc_mgmt::shutdown::shutdown).await,
+            Usecases::Reboot => do_dang(pc_mgmt::shutdown::reboot).await,
         }
     }
 }
