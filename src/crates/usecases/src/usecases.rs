@@ -1,5 +1,6 @@
 use macros::Stringify;
 
+use shared::configuration::CONFIG;
 use tracing::*;
 
 use crate::scenarios::*;
@@ -43,8 +44,16 @@ pub enum Usecases {
     ///  - Go back to the last track.
     PlayPrevTrack,
 
+    /// Turns off the computer.
+    Shutdown,
+
+    /// Reboot computer.
+    Reboot,
+
+    /// Open specified app.
     OpenApp(String),
 
+    /// Basic system monitoring.
     StartBasicSystemMonitoring,
 
     /// If no other options are suitable, then this is a simple request from a language model.
@@ -78,8 +87,21 @@ impl Usecases {
             }
             Usecases::OpenApp(app) => open_app::open(app).await,
             Usecases::Answer => geranal_answer::answer(userinput).await,
+            Usecases::Shutdown => {
+                do_dang(pc_mgmt::shutdown::shutdown).await;
+            }
+            Usecases::Reboot => {
+                do_dang(pc_mgmt::shutdown::reboot).await;
+            }
         }
     }
 }
 
-// if new usecases with some params will be added, they should be added as example to the `Requests` enum in `requests.rs`
+async fn do_dang(h: impl std::ops::AsyncFnOnce()) {
+    if CONFIG.usecases.test_dangerous_features {
+        info!("Execute dangerous feature.");
+        h().await
+    } else {
+        info!("Dangerous features doesn't execute.");
+    }
+}
