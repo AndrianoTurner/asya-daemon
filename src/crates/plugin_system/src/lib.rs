@@ -119,9 +119,9 @@ async unsafe fn do_loop(plugins_data: &mut [PluginRuntimeInfo], receiver: Mutex<
     }
 }
 
-async unsafe fn check_event_for_send<'a>(
+async unsafe fn check_event_for_send(
     info: &mut PluginRuntimeInfo,
-    event_recv: &mut tokio::sync::MutexGuard<'a, Receiver<String>>,
+    event_recv: &mut tokio::sync::MutexGuard<'_, Receiver<String>>,
 ) {
     let event_callback = info.plugin_information.event_callback;
     let recieved_event = event_recv.recv().await;
@@ -243,9 +243,11 @@ unsafe fn load_plugin_data(libs: Vec<String>) -> Vec<PluginRuntimeInfo> {
             .map(|(_, v)| extract_config_ptr(v))
             .unwrap_or(ptr::null_mut());
 
+
+        // тут сегфолтит
         let state = (boxed_plugin_information.init_callback)(
             config_ptr.cast_const(),
-            api_callbacks::get_api(),
+            dbg!(api_callbacks::get_api()),
         );
         info!("Plugin loaded: {}", str_plugin_name,);
 

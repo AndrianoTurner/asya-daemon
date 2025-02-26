@@ -1,19 +1,21 @@
 use lazy_static::lazy_static;
-use std::ffi::{c_char, CString};
+use plugin_interface::{ApiCallbacksMap, ApiCallbacksPair};
+use std::ffi::{c_char, c_void, CString};
 
-use plugin_interface::ApiCallbacks;
 use tracing::*;
 
 use crate::event_system;
 
 use super::{abstractions, ReadableRequest};
 
-pub fn get_api() -> ApiCallbacks {
-    ApiCallbacks {
-        send_human_request,
-        subscribe_to_events,
-        publish_event,
-    }
+pub unsafe fn get_api() -> ApiCallbacksMap {
+    let callbacks = vec![
+        ApiCallbacksPair::new("send_human_request", send_human_request as *const c_void),
+        ApiCallbacksPair::new("subscribe_to_events", subscribe_to_events as *const c_void),
+        ApiCallbacksPair::new("publish_event", publish_event as *const c_void),
+    ];
+
+    ApiCallbacksMap::new(callbacks)
 }
 
 lazy_static! {
@@ -36,6 +38,7 @@ unsafe extern "C" fn send_human_request(human: *mut c_char) {
 
 #[no_mangle]
 unsafe extern "C" fn subscribe_to_events(callback: unsafe extern "C" fn(*const c_char)) {
+    println!("sub to events");
     RUNTIME.spawn(async move {
         loop {
             let (_, rx) = event_system::get_channel().await;
