@@ -38,15 +38,6 @@ impl Default for State {
     }
 }
 
-// #[repr(C)]
-// #[derive(Clone, Copy)]
-// pub struct ApiCallbacks {
-//     pub send_human_request: unsafe extern "C" fn(request: *mut c_char),
-//     pub subscribe_to_events:
-//         unsafe extern "C" fn(callback: unsafe extern "C" fn(event: *const c_char)),
-//     pub publish_event: unsafe extern "C" fn(sender: *const c_char, event: *const c_char),
-// }
-
 #[repr(C)]
 #[derive(Debug)]
 pub struct PluginInformation {
@@ -65,23 +56,18 @@ pub struct ApiCallbacksMap {
 impl fmt::Debug for ApiCallbacksMap {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         unsafe {
-            // Создаем срез из сырого указателя и длины
             let slice: &[ApiCallbacksPair] =
                 slice::from_raw_parts(self.callbacks, self.callbacks_len as usize);
 
-            // Начинаем форматирование как структуру
             let mut debug_struct = f.debug_struct("ApiCallbacksMap");
             debug_struct.field("callbacks_len", &self.callbacks_len);
 
-            // Собираем информацию о callbacks в вектор для красивого вывода
             let mut callbacks_info = Vec::new();
             for el in slice {
-                // Преобразуем имя обратного вызова в строку
                 let name = match CStr::from_ptr(el.callback_name).to_str() {
                     Ok(name) => name.to_string(),
                     Err(_) => "<invalid UTF-8>".to_string(),
                 };
-                // Указатель на функцию выводим как адрес
                 let callback_ptr = format!("{:p}", el.callback);
                 callbacks_info.push(format!(
                     "{{ name: \"{}\", callback: {} }}",
