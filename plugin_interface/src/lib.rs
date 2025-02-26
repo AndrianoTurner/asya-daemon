@@ -1,7 +1,7 @@
 use core::fmt;
 use std::{
-    ffi::{c_char, c_int, c_uint, c_void, CStr, CString},
-    mem, ptr, slice,
+    ffi::{c_char, c_uint, c_void, CStr, CString},
+    ptr, slice,
     str::FromStr,
 };
 
@@ -98,26 +98,25 @@ impl fmt::Debug for ApiCallbacksMap {
 
 impl ApiCallbacksMap {
     pub fn new(callbacks: Vec<ApiCallbacksPair>) -> Self {
+        let leaked = Box::leak(callbacks.into_boxed_slice());
         Self {
-            callbacks_len: callbacks.len() as u32,
-            callbacks: callbacks.leak().as_ptr(),
+            callbacks_len: leaked.len() as u32,
+            callbacks: leaked.as_ptr(),
         }
     }
 
     #[no_mangle]
     pub unsafe fn callback(&self, name: &str) -> *const c_void {
-        let slice: &[ApiCallbacksPair] =
-            slice::from_raw_parts(self.callbacks, self.callbacks_len as usize);
-
-        for c in slice {
-            let c_name = match CStr::from_ptr(c.callback_name).to_str() {
+        for i in 0..self.callbacks_len {
+            let current = self.callbacks.add(i as usize);
+            let c_name = match CStr::from_ptr((*current).callback_name).to_str() {
                 Ok(name) => name,
                 Err(_) => continue,
             };
 
             if c_name == name {
                 println!("калбеsaddк {}", name);
-                return dbg!(c.callback);
+                return dbg!((*current).callback);
             }
         }
         ptr::null()
