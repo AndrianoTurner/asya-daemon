@@ -21,6 +21,7 @@ use shared::{
 mod abstractions;
 mod api_callbacks;
 
+mod dotnet;
 mod native;
 
 #[derive(Debug, Serialize, Clone, Deref, From, Into)]
@@ -38,7 +39,7 @@ pub struct PluginEvent {
     data: Event,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum FoundedPlugin {
     Native {
         path: PathBuf,
@@ -57,9 +58,11 @@ pub fn load_plugins(receiver: Mutex<Receiver<String>>) {
             rt.block_on(async {
                 let libraries_path = find_plugins();
 
-                let mut plugins_data = native::load_plugin_data(libraries_path);
+                let mut native_plugins_data =
+                    native::load_native_plugin_data(libraries_path.clone());
+                let dotnet_plugins_data = dotnet::load_dotnet_plugin_data(libraries_path);
 
-                do_loop(&mut plugins_data, receiver).await
+                do_loop(&mut native_plugins_data, receiver).await
             })
         })
     };

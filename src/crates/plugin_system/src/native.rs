@@ -20,7 +20,7 @@ pub(crate) struct NativePluginRuntimeInfo {
     pub(crate) state: *mut State,
 }
 
-pub unsafe fn load_plugin_data(libs: Vec<FoundedPlugin>) -> Vec<NativePluginRuntimeInfo> {
+pub unsafe fn load_native_plugin_data(libs: Vec<FoundedPlugin>) -> Vec<NativePluginRuntimeInfo> {
     const FN_PLUGIN_INFO: &[u8; 11] = b"plugin_info";
     let mut infos = vec![];
     for lib in libs {
