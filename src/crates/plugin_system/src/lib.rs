@@ -188,13 +188,19 @@ async unsafe fn check_event_for_publish(info: &mut native::NativePluginRuntimeIn
 }
 
 #[derive(Debug, Clone, Serialize)]
-pub struct ReadableRequest(pub String);
+#[serde(rename_all = "camelCase")]
+pub struct ReadableRequest {
+    pub request: String,
+}
 
 async unsafe fn check_request(plugin_state: ptr::NonNull<State>) {
     if let Some(request_ptr) = ptr::NonNull::new(plugin_state.read().human_request) {
         let request_data = CStr::from_ptr(request_ptr.as_ptr()).to_str();
         if let Ok(str_data) = request_data {
-            event_system::publish(ReadableRequest(str_data.to_string())).await;
+            event_system::publish(ReadableRequest {
+                request: str_data.to_string(),
+            })
+            .await;
         }
     }
 }

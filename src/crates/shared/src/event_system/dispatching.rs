@@ -1,4 +1,3 @@
-use tracing::*;
 use serde::Serialize;
 use std::any::Any;
 use std::collections::HashMap;
@@ -6,6 +5,7 @@ use std::sync::Arc;
 use tokio::sync::mpsc::Sender;
 use tokio::sync::RwLock;
 use tokio::task;
+use tracing::*;
 
 // use crate::plugin_system::PluginManager;
 
@@ -91,8 +91,21 @@ impl AsyncEventDispatcher {
             .unwrap();
 
         let (tx, _) = crate::event_system::get_channel().await;
-        tx.send(serde_json::to_string(&*event).unwrap())
-            .await
-            .unwrap();
+        tx.send(
+            serde_json::to_string(&ForPluginWrapper {
+                event_name: event_type.split("::").last().unwrap().to_string(),
+                event_body: &*event,
+            })
+            .unwrap(),
+        )
+        .await
+        .unwrap();
     }
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct ForPluginWrapper<T> {
+    pub event_name: String,
+    pub event_body: T,
 }

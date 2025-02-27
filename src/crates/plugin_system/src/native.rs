@@ -66,7 +66,7 @@ pub unsafe fn load_native_plugin_data(libs: Vec<FoundedPlugin>) -> Vec<NativePlu
             // тут сегфолтит
             let state = (boxed_plugin_information.init_callback)(
                 config_ptr.cast_const(),
-                dbg!(api_callbacks::get_api()),
+                api_callbacks::get_api(),
             );
             info!("Plugin loaded: {}", str_plugin_name,);
 

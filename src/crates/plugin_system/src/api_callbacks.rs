@@ -29,7 +29,10 @@ unsafe extern "C" fn send_human_request(human: *mut c_char) {
         let cstring_cast = from_raw.to_str();
         match cstring_cast {
             Ok(casted_str) => {
-                event_system::publish(ReadableRequest(casted_str.to_string())).await;
+                event_system::publish(ReadableRequest {
+                    request: casted_str.to_string(),
+                })
+                .await;
             }
             Err(err) => warn!("Error due send_human_response API call: {}", err),
         }
@@ -38,7 +41,6 @@ unsafe extern "C" fn send_human_request(human: *mut c_char) {
 
 #[no_mangle]
 unsafe extern "C" fn subscribe_to_events(callback: unsafe extern "C" fn(*const c_char)) {
-    println!("sub to events");
     RUNTIME.spawn(async move {
         loop {
             let (_, rx) = event_system::get_channel().await;

@@ -102,7 +102,7 @@ impl ApiCallbacksMap {
 
             if c_name == name {
                 println!("калбеsaddк {}", name);
-                return dbg!((*current).callback);
+                return (*current).callback;
             }
         }
         ptr::null()

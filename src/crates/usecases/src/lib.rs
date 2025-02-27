@@ -23,7 +23,7 @@ pub async fn subscribe_for_plugins() {
     event_system::subscribe_once({
         move |event: Arc<ReadableRequest>| {
             task::spawn(async move {
-                dispatch_by_user_message(event.0.to_string()).await;
+                dispatch_by_user_message(event.request.clone()).await;
             })
         }
     })
