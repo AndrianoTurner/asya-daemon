@@ -9,7 +9,7 @@ pub type EventCallbalck = unsafe extern "C" fn(*const EventState, ApiCallbacksMa
 pub type ExecuteCallback = unsafe extern "C" fn(*mut State, ApiCallbacksMap);
 pub type InitCallback = unsafe extern "C" fn(*const c_char, ApiCallbacksMap) -> *mut State;
 
-pub type PluginInfoCallback = unsafe extern "C" fn() -> *const PluginInformation;
+pub type PluginInfoCallback = unsafe extern "C" fn() -> *const NativePluginInformation;
 
 #[repr(C)]
 #[derive(Clone, Copy)]
@@ -40,7 +40,7 @@ impl Default for State {
 
 #[repr(C)]
 #[derive(Debug)]
-pub struct PluginInformation {
+pub struct NativePluginInformation {
     pub name: *const c_char,
     pub event_callback: EventCallbalck,
     pub init_callback: InitCallback,
