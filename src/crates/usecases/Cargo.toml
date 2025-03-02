@@ -7,6 +7,8 @@ edition.workspace = true
 path = "./src/lib.rs"
 
 [dependencies]
+async-trait.workspace = true
+
 services.workspace = true
 shared.workspace = true
 macros.workspace = true
