@@ -1,6 +1,6 @@
-use tracing::*;
 use macros::Stringify;
 use serde::{Deserialize, Serialize};
+use tokio::fs;
 
 use crate::scenarios::*;
 
@@ -10,52 +10,72 @@ use crate::scenarios::*;
 #[derive(Debug, Stringify, serde::Serialize, serde::Deserialize, schemars::JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub enum InternalUsecases {
+    #[schemars(description = "Turns off the music playback")]
     TurnOffMusic,
+
+    #[schemars(description = "Turns on the music playback")]
     TurnOnMusic,
+
+    #[schemars(description = "Retrieves the current music playback status")]
     GetMusicStatus,
+
+    #[schemars(description = "Plays the next track in the music playlist")]
     PlayNextTrack,
+
+    #[schemars(description = "Plays the previous track in the music playlist")]
     PlayPrevTrack,
 
+    #[schemars(description = "Opens a specified application")]
     #[serde(rename_all = "camelCase")]
-    Open {
-        app_kind: AppKind,
-    },
+    Open { app_kind: AppKind },
 
+    #[schemars(description = "Starts basic system monitoring functionality")]
     StartBasicSystemMonitoring,
+
+    #[schemars(description = "Provides an answer to a query")]
     Answer,
 }
 
 #[derive(Serialize, Stringify, Deserialize, Debug, Clone, schemars::JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub enum AppKind {
+    #[schemars(description = "Opens the terminal application")]
     Terminal,
+
+    #[schemars(description = "Opens the web browser")]
     Browser,
+
+    #[schemars(description = "Opens the Steam gaming platform")]
     Steam,
+
+    #[schemars(description = "Opens the Discord application")]
     Discord,
+
+    #[schemars(description = "Opens the Telegram messaging application")]
     Telegram,
+
+    #[schemars(description = "Opens a specific application")]
     Specific(App),
 }
 
 #[derive(Serialize, Stringify, Deserialize, Debug, Clone, schemars::JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub enum App {
+    // #[schemars(description = "Represents a text-based user interface application with a given name")]
     // Tui(String),
+    #[schemars(
+        description = "Represents a graphical user interface application with a given name"
+    )]
     Gui(String),
 }
 
 impl InternalUsecases {
-    pub fn stringify_all() -> String {
-        let strings = [
-            InternalUsecases::stringify_one(),
-            AppKind::stringify_one(),
-            App::stringify_one(),
-        ];
-        let iter = strings.iter().map(|el| el.to_string() + "\n\n");
-        String::from_iter(iter)
-    }
-    pub async fn execute(self, userinput: String) {
+    pub async fn dispatch(self, userinput: String) {
         let command = self;
-        debug!("Dispatching command: {:?}", command);
+        let schema = schemars::schema_for!(InternalUsecases);
+        let scheme_string = serde_json::to_string_pretty(&schema).unwrap(); 
+        fs::write("./bebra.json", &scheme_string).await.unwrap();
+        println!("Scheme: {}", scheme_string);
         match command {
             InternalUsecases::TurnOffMusic | InternalUsecases::TurnOnMusic => {
                 music_control::play_or_resume_music(userinput).await;

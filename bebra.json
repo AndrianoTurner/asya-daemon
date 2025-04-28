@@ -1,0 +1,148 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "InternalUsecases",
+  "description": "Usecases are the main business logic of the application.\n\nThis usecases module contains all the possible actions that the user can perform from client.",
+  "oneOf": [
+    {
+      "description": "Turns off the music playback",
+      "type": "string",
+      "enum": [
+        "turnOffMusic"
+      ]
+    },
+    {
+      "description": "Turns on the music playback",
+      "type": "string",
+      "enum": [
+        "turnOnMusic"
+      ]
+    },
+    {
+      "description": "Retrieves the current music playback status",
+      "type": "string",
+      "enum": [
+        "getMusicStatus"
+      ]
+    },
+    {
+      "description": "Plays the next track in the music playlist",
+      "type": "string",
+      "enum": [
+        "playNextTrack"
+      ]
+    },
+    {
+      "description": "Plays the previous track in the music playlist",
+      "type": "string",
+      "enum": [
+        "playPrevTrack"
+      ]
+    },
+    {
+      "description": "Opens a specified application",
+      "type": "object",
+      "required": [
+        "open"
+      ],
+      "properties": {
+        "open": {
+          "type": "object",
+          "required": [
+            "appKind"
+          ],
+          "properties": {
+            "appKind": {
+              "$ref": "#/definitions/AppKind"
+            }
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    {
+      "description": "Starts basic system monitoring functionality",
+      "type": "string",
+      "enum": [
+        "startBasicSystemMonitoring"
+      ]
+    },
+    {
+      "description": "Provides an answer to a query",
+      "type": "string",
+      "enum": [
+        "answer"
+      ]
+    }
+  ],
+  "definitions": {
+    "App": {
+      "oneOf": [
+        {
+          "description": "Represents a graphical user interface application with a given name",
+          "type": "object",
+          "required": [
+            "gui"
+          ],
+          "properties": {
+            "gui": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "AppKind": {
+      "oneOf": [
+        {
+          "description": "Opens the terminal application",
+          "type": "string",
+          "enum": [
+            "terminal"
+          ]
+        },
+        {
+          "description": "Opens the web browser",
+          "type": "string",
+          "enum": [
+            "browser"
+          ]
+        },
+        {
+          "description": "Opens the Steam gaming platform",
+          "type": "string",
+          "enum": [
+            "steam"
+          ]
+        },
+        {
+          "description": "Opens the Discord application",
+          "type": "string",
+          "enum": [
+            "discord"
+          ]
+        },
+        {
+          "description": "Opens the Telegram messaging application",
+          "type": "string",
+          "enum": [
+            "telegram"
+          ]
+        },
+        {
+          "description": "Opens a specific application",
+          "type": "object",
+          "required": [
+            "specific"
+          ],
+          "properties": {
+            "specific": {
+              "$ref": "#/definitions/App"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    }
+  }
+}

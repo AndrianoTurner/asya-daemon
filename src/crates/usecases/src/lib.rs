@@ -40,7 +40,7 @@ impl UsecaseMeta {
         if self.id_receiver == "asya-daemon" {
             match serde_json::from_value::<InternalUsecases>(self.payload.clone()) {
                 Ok(usecase_internal) => {
-                    usecase_internal.execute(message).await;
+                    usecase_internal.dispatch(message).await;
                 }
                 Err(err) => warn!("Error parsing usecase: {:?}", err),
             }
@@ -112,7 +112,7 @@ pub async fn dispatch_by_user_message(message: String) {
     } else {
         usecases::InternalUsecases::Answer
     };
-    usecase.execute(message).await;
+    usecase.dispatch(message).await;
 }
 
 // general purpose events
