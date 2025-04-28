@@ -18,7 +18,6 @@ pub struct UsecaseMeta {
     name: String,
     id_receiver: String, // uuid
     payload_type: String,
-    ai_desc: String, // todo: change to hashmap for diff localizations
     payload: serde_json::Value,
 }
 
@@ -26,7 +25,6 @@ impl UsecaseMeta {
     pub fn new(
         name: String,
         id_receiver: String,
-        ai_desc: String,
         payload_type: String,
         payload: String,
     ) -> Self {
@@ -35,21 +33,19 @@ impl UsecaseMeta {
             id_receiver,
             payload_type,
             payload: serde_json::from_str(&payload).unwrap(),
-            ai_desc,
         }
     }
 
-    pub async fn execute(&self, message: String) {
+    pub async fn execute(self, message: String) {
         if self.id_receiver == "asya-daemon" {
             match serde_json::from_value::<InternalUsecases>(self.payload.clone()) {
                 Ok(usecase_internal) => {
-                    println!("executing usecase: {:#?}", usecase_internal);
                     usecase_internal.execute(message).await;
                 }
-                Err(err) => println!("Error parsing usecase: {:?}", err),
+                Err(err) => warn!("Error parsing usecase: {:?}", err),
             }
         }
-        event_system::publish(self.clone()).await;
+        event_system::publish(self).await;
     }
 }
 
