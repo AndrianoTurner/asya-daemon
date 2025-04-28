@@ -1,21 +1,51 @@
-use crate::usecases::Usecases;
-use tracing::*;
-use serde::Serialize;
+use crate::usecases::InternalUsecases;
+use plugin_system::ReadableRequest;
+use serde::{Deserialize, Serialize};
 use services::llm_api;
 use shared::event_system;
-use plugin_system::ReadableRequest;
 use std::sync::Arc;
 use tokio::task;
+use tracing::*;
 
 pub mod scenarios;
 pub mod shared_workers;
 mod tools;
 pub mod usecases;
 
-fn process_response(llm_response: &str) -> Result<Usecases, Box<dyn std::error::Error>> {
+#[derive(Serialize, Deserialize, Debug)]
+#[repr(C)]
+pub struct UsecaseMeta {
+    name: String,
+    id_receiver: String, // uuid
+    payload_type: String,
+    payload: serde_json::Value,
+}
+
+impl UsecaseMeta {
+    pub fn new(name: String, id_receiver: String, payload_type: String, payload: String) -> Self {
+        UsecaseMeta {
+            name,
+            id_receiver,
+            payload_type,
+            payload: serde_json::from_str(&payload).unwrap(),
+        }
+    }
+
+    pub async fn execute(&self, message: String) {
+        match serde_json::from_value::<InternalUsecases>(self.payload.clone()) {
+            Ok(usecase_internal) => {
+                println!("executing usecase: {:#?}", usecase_internal);
+                usecase_internal.execute(message).await;
+            }
+            Err(err) => println!("Error parsing usecase: {:?}", err),
+        }
+    }
+}
+
+fn process_response(llm_response: &str) -> Result<InternalUsecases, Box<dyn std::error::Error>> {
     let llm_response = llm_response.replace("`json", "");
     let llm_response = llm_response.replace("`", "");
-    let usecase = serde_json::from_str::<Usecases>(&llm_response.clone())?;
+    let usecase = serde_json::from_str::<InternalUsecases>(&llm_response.clone())?;
     Ok(usecase)
 }
 
@@ -31,7 +61,7 @@ pub async fn subscribe_for_plugins() {
 }
 
 pub async fn dispatch_by_user_message(message: String) {
-    let schema = schemars::schema_for!(Usecases);
+    let schema = schemars::schema_for!(InternalUsecases);
 
     let c_req = format!(
         "
@@ -73,7 +103,7 @@ pub async fn dispatch_by_user_message(message: String) {
         }
         usecase.unwrap()
     } else {
-        usecases::Usecases::Answer
+        usecases::InternalUsecases::Answer
     };
     usecase.execute(message).await;
 }
