@@ -3,7 +3,7 @@ use crate::api_callbacks;
 use super::FoundedPlugin;
 use netcorehost::{
     nethost, pdcstr,
-    pdcstring::{PdCStr, PdCString},
+    pdcstring::PdCString,
 };
 use plugin_interface::ApiCallbacksMap;
 

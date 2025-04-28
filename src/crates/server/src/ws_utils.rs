@@ -15,7 +15,6 @@ pub async fn ws_handler(req: HttpRequest, stream: web::Payload) -> Result<HttpRe
     let session_ptr = Arc::new(RwLock::new(session));
     let mut stream = stream
         .aggregate_continuations()
-        // aggregate continuation frames up to 1MiB
         .max_continuation_size(2_usize.pow(20));
 
     rt::spawn(async move {
@@ -75,8 +74,9 @@ async fn handle_request(request: Requests, session: Arc<RwLock<Session>>) {
         Requests::Command { action } => {
             action.execute("".to_string()).await;
         }
-        Requests::Human { message } => {
-            usecases::dispatch_by_user_message(message).await;
+        Requests::Human { message: _message } => {
+            todo!()
+            // usecases::dispatch_by_user_message(message).await;
         }
     }
 }

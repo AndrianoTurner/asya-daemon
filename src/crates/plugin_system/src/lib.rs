@@ -60,7 +60,7 @@ pub fn load_plugins(receiver: Mutex<Receiver<String>>) {
 
                 let mut native_plugins_data =
                     native::load_native_plugin_data(libraries_path.clone());
-                let dotnet_plugins_data = dotnet::load_dotnet_plugin_data(libraries_path);
+                let _dotnet_plugins_data = dotnet::load_dotnet_plugin_data(libraries_path);
 
                 do_loop(&mut native_plugins_data, receiver).await
             })

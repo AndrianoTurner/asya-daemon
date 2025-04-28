@@ -12,7 +12,7 @@ pub mod shared_workers;
 mod tools;
 pub mod usecases;
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 #[repr(C)]
 pub struct UsecaseMeta {
     name: String,
@@ -23,7 +23,13 @@ pub struct UsecaseMeta {
 }
 
 impl UsecaseMeta {
-    pub fn new(name: String, id_receiver: String, ai_desc: String, payload_type: String, payload: String) -> Self {
+    pub fn new(
+        name: String,
+        id_receiver: String,
+        ai_desc: String,
+        payload_type: String,
+        payload: String,
+    ) -> Self {
         UsecaseMeta {
             name,
             id_receiver,
@@ -34,13 +40,16 @@ impl UsecaseMeta {
     }
 
     pub async fn execute(&self, message: String) {
-        match serde_json::from_value::<InternalUsecases>(self.payload.clone()) {
-            Ok(usecase_internal) => {
-                println!("executing usecase: {:#?}", usecase_internal);
-                usecase_internal.execute(message).await;
+        if self.id_receiver == "asya-daemon" {
+            match serde_json::from_value::<InternalUsecases>(self.payload.clone()) {
+                Ok(usecase_internal) => {
+                    println!("executing usecase: {:#?}", usecase_internal);
+                    usecase_internal.execute(message).await;
+                }
+                Err(err) => println!("Error parsing usecase: {:?}", err),
             }
-            Err(err) => println!("Error parsing usecase: {:?}", err),
         }
+        event_system::publish(self.clone()).await;
     }
 }
 
