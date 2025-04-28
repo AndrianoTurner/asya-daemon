@@ -2,7 +2,7 @@ use serde::Serialize;
 use std::any::Any;
 use std::collections::HashMap;
 use std::sync::Arc;
-use tokio::sync::mpsc::{self, Receiver, Sender};
+use tokio::sync::mpsc::{self, Receiver, Sender, UnboundedReceiver, UnboundedSender};
 use tokio::sync::{Mutex, OnceCell, RwLock};
 use tokio::task;
 
@@ -47,11 +47,11 @@ where
     get_event_dispatcher().await.publish(event).await;
 }
 
-
-pub async fn get_channel() -> &'static (Sender<String>, Mutex<Receiver<String>>) {
-    static ONCE: OnceCell<(Sender<String>, Mutex<Receiver<String>>)> = OnceCell::const_new();
+pub async fn get_channel() -> &'static (UnboundedSender<String>, Mutex<UnboundedReceiver<String>>) {
+    static ONCE: OnceCell<(UnboundedSender<String>, Mutex<UnboundedReceiver<String>>)> =
+        OnceCell::const_new();
     ONCE.get_or_init(|| async {
-        let (tx, rx) = mpsc::channel(32);
+        let (tx, rx) = mpsc::unbounded_channel();
         (tx, Mutex::const_new(rx))
     })
     .await

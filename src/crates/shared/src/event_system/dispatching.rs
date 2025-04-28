@@ -86,19 +86,16 @@ impl AsyncEventDispatcher {
         debug!("Publishing event: {} - {:?}", event_type, event);
 
         let lock = self.sender.write().await;
-        lock.send(serde_json::to_string(&*event).unwrap())
-            .await
-            .unwrap();
+        _ = lock.send(serde_json::to_string(&*event).unwrap()).await;
 
         let (tx, _) = crate::event_system::get_channel().await;
         tx.send(
-            serde_json::to_string(&ForPluginWrapper {
+            serde_json::to_string(&dbg!(ForPluginWrapper {
                 event_name: event_type.split("::").last().unwrap().to_string(),
                 event_body: &*event,
-            })
+            }))
             .unwrap(),
         )
-        .await
         .unwrap();
     }
 }

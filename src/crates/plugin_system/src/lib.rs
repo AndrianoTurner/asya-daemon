@@ -1,5 +1,4 @@
 use derive_more::derive::{Deref, From, Into};
-use plugin_interface::{EventState, State};
 use serde::Serialize;
 use std::{
     collections::HashMap,
@@ -8,7 +7,6 @@ use std::{
     path::{Path, PathBuf},
     ptr::{self},
     thread,
-    time::Duration,
 };
 use tokio::sync::{mpsc::Receiver, Mutex};
 use tracing::*;
@@ -51,20 +49,33 @@ pub enum FoundedPlugin {
 }
 
 /// Loads plugins from path from config.
-pub fn load_plugins(receiver: Mutex<Receiver<String>>) {
+pub fn load_plugins(_receiver: Mutex<Receiver<String>>) {
     unsafe {
-        thread::spawn(move || {
-            let rt = tokio::runtime::Runtime::new().unwrap();
-            rt.block_on(async {
-                let libraries_path = find_plugins();
+        let libraries_path = find_plugins();
 
-                let mut native_plugins_data =
-                    native::load_native_plugin_data(libraries_path.clone());
-                let _dotnet_plugins_data = dotnet::load_dotnet_plugin_data(libraries_path);
+        native::load_native_plugin_data(&libraries_path)
+            .into_iter()
+            .for_each(|el| {
+                let callback = el.plugin_information.init_callback;
+                let name = CStr::from_ptr(el.plugin_information.name).to_str().unwrap();
+                thread::spawn(move || {
+                    let rt = tokio::runtime::Runtime::new().unwrap();
+                    rt.block_on(async {
+                        let _lib = el._library;
+                        let config = CONFIG
+                            .plugins
+                            .config
+                            .get_key_value(name)
+                            .map(|(_, v)| crate::extract_config_ptr(v))
+                            .unwrap_or(ptr::null_mut())
+                            .cast_const();
 
-                do_loop(&mut native_plugins_data, receiver).await
-            })
-        })
+                        (callback)(config, api_callbacks::get_api());
+                    })
+                });
+            });
+
+        let _dotnet_plugins_data = dotnet::load_dotnet_plugin_data(&libraries_path);
     };
 }
 
@@ -133,113 +144,10 @@ fn collect_files(dir: &Path) -> io::Result<Vec<PathBuf>> {
     Ok(files_with_extension)
 }
 
-async unsafe fn do_loop(
-    plugins_data: &mut [native::NativePluginRuntimeInfo],
-    receiver: Mutex<Receiver<String>>,
-) {
-    let mut recv = receiver.lock().await;
-    loop {
-        for info in &mut *plugins_data {
-            if !recv.is_empty() {
-                check_event_for_send(info, &mut recv).await;
-            } else {
-                (info.plugin_information.execute_callback)(info.state, api_callbacks::get_api());
-            }
-            check_event_for_publish(info).await;
-        }
-        tokio::time::sleep(Duration::from_micros(100)).await;
-    }
-}
-
-async unsafe fn check_event_for_send(
-    info: &mut native::NativePluginRuntimeInfo,
-    event_recv: &mut tokio::sync::MutexGuard<'_, Receiver<String>>,
-) {
-    let event_callback = info.plugin_information.event_callback;
-    let recieved_event = event_recv.recv().await;
-
-    // Maybe we should pass some set of events instead one?
-    let ptr = extract_ptr(recieved_event);
-
-    let event_state = Box::into_raw(Box::new(EventState {
-        state: info.state,
-        event: ptr,
-    }));
-    (event_callback)(event_state, api_callbacks::get_api());
-}
-
-fn extract_ptr(res: Option<String>) -> *const std::ffi::c_char {
-    CString::new(res.expect("mpsc for events was closed. this is a bug."))
-        // release ownership here because memory frees in free_event_memory()
-        .map(|cstring| cstring.into_raw().cast_const())
-        .unwrap_or_else(|_| {
-            warn!("Event string representation contains zero byte, which is not allowed.");
-            ptr::null()
-        })
-}
-
-async unsafe fn check_event_for_publish(info: &mut native::NativePluginRuntimeInfo) {
-    if let Some(plugin_state) = ptr::NonNull::new(info.state) {
-        check_event(plugin_state, info).await;
-        check_request(plugin_state).await;
-
-        free_memory(info);
-    }
-}
-
 #[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ReadableRequest {
     pub request: String,
-}
-
-async unsafe fn check_request(plugin_state: ptr::NonNull<State>) {
-    if let Some(request_ptr) = ptr::NonNull::new(plugin_state.read().human_request) {
-        let request_data = CStr::from_ptr(request_ptr.as_ptr()).to_str();
-        if let Ok(str_data) = request_data {
-            event_system::publish(ReadableRequest {
-                request: str_data.to_string(),
-            })
-            .await;
-        }
-    }
-}
-
-async unsafe fn check_event(
-    plugin_state: ptr::NonNull<State>,
-    info: &mut native::NativePluginRuntimeInfo,
-) {
-    if let Some(published_event) = ptr::NonNull::new(plugin_state.read().published_event) {
-        let (sender_string, event_string) = match abstractions::safe_cast_name_event(
-            info.plugin_information.name,
-            published_event.as_ptr(),
-        ) {
-            Some(value) => value,
-            None => return,
-        };
-        _ = abstractions::send_plugin_event_checked(sender_string, event_string).await;
-    }
-}
-
-unsafe fn free_memory(info: &mut native::NativePluginRuntimeInfo) {
-    let event_raw = (*info.state).published_event;
-    if !event_raw.is_null() {
-        drop(Box::from_raw(event_raw)); // panics if plugins frees memory independently, e.g. if after
-                                        // casting event to CString
-        (*info.state).published_event = ptr::null_mut()
-    }
-
-    let message_raw = (*info.state).readable_message;
-    if !message_raw.is_null() {
-        drop(Box::from_raw(message_raw)); // same as above
-        (*info.state).readable_message = ptr::null_mut()
-    }
-
-    let request_raw = (*info.state).human_request;
-    if !message_raw.is_null() {
-        drop(Box::from_raw(request_raw)); // same as above
-        (*info.state).human_request = ptr::null_mut()
-    }
 }
 
 type ConfigEntry<'a> =

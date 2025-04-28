@@ -44,13 +44,13 @@ impl UsecaseMeta {
     }
 }
 
-fn process_response(llm_response: &str) -> Result<InternalUsecases, Box<dyn std::error::Error>> {
-    let llm_response = llm_response.replace("`json", "");
-    let llm_response = llm_response.replace("`", "");
-    let usecase = serde_json::from_str::<InternalUsecases>(&llm_response.clone())?;
-    Ok(usecase)
-}
-
+// fn process_response(llm_response: &str) -> Result<InternalUsecases, Box<dyn std::error::Error>> {
+//     let llm_response = llm_response.replace("`json", "");
+//     let llm_response = llm_response.replace("`", "");
+//     let usecase = serde_json::from_str::<InternalUsecases>(&llm_response.clone())?;
+//     Ok(usecase)
+// }
+//
 pub async fn subscribe_for_plugins() {
     event_system::subscribe_once({
         move |event: Arc<ReadableRequest>| {
@@ -64,20 +64,17 @@ pub async fn subscribe_for_plugins() {
 
 pub async fn dispatch_by_user_message(message: String) {
     let schema = schemars::schema_for!(InternalUsecases);
-    let usecase_json_string = llm_api::send_request(
+    if let Ok(usecase_json_string) = llm_api::send_request(
         format!(
         "Translate this userinput \"{}\" into json value following by following json schemes and send me only generated json without any other text. 
                 Generated json will be used as value of existing json object. 
             If value doesn't have an key return value without brases, but save json syntax please. {}", message, serde_json::to_string(&schema).unwrap()
         )
-    ).await.unwrap();
-
-    let usecase = if let Ok(u) = serde_json::from_str::<InternalUsecases>(&usecase_json_string) {
-        u
-    } else {
-        InternalUsecases::Answer
+    ).await {
+        let usecase = serde_json::from_str::<InternalUsecases>(&usecase_json_string)
+            .unwrap_or(InternalUsecases::Answer);
+        usecase.dispatch(message).await;
     };
-    usecase.dispatch(message).await;
 }
 
 // general purpose events

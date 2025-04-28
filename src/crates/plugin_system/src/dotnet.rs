@@ -10,7 +10,7 @@ use plugin_interface::ApiCallbacksMap;
 pub struct DotnetRuntimePluginInfo {}
 
 pub(crate) fn load_dotnet_plugin_data(
-    libraries_path: Vec<FoundedPlugin>,
+    libraries_path: &[FoundedPlugin],
 ) -> Vec<DotnetRuntimePluginInfo> {
     for lib in libraries_path {
         if let FoundedPlugin::Dotnet {

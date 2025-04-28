@@ -7,9 +7,9 @@ use std::{
 
 pub type EventCallbalck = unsafe extern "C" fn(*const EventState, ApiCallbacksMap);
 pub type ExecuteCallback = unsafe extern "C" fn(*mut State, ApiCallbacksMap);
-pub type InitCallback = unsafe extern "C" fn(*const c_char, ApiCallbacksMap) -> *mut State;
+pub type InitCallback = unsafe extern "C" fn(*const c_char, ApiCallbacksMap);
 
-pub type PluginInfoCallback = unsafe extern "C" fn() -> *const NativePluginInformation;
+pub type NativePluginInfoCallback = unsafe extern "C" fn() -> *const NativePluginInformation;
 
 #[repr(C)]
 #[derive(Clone, Copy)]
@@ -42,9 +42,9 @@ impl Default for State {
 #[derive(Debug)]
 pub struct NativePluginInformation {
     pub name: *const c_char,
-    pub event_callback: EventCallbalck,
+    // pub event_callback: EventCallbalck,
     pub init_callback: InitCallback,
-    pub execute_callback: ExecuteCallback,
+    // pub execute_callback: ExecuteCallback,
 }
 
 #[repr(C)]
