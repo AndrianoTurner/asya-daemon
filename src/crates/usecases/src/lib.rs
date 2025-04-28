@@ -18,16 +18,18 @@ pub struct UsecaseMeta {
     name: String,
     id_receiver: String, // uuid
     payload_type: String,
+    ai_desc: String,
     payload: serde_json::Value,
 }
 
 impl UsecaseMeta {
-    pub fn new(name: String, id_receiver: String, payload_type: String, payload: String) -> Self {
+    pub fn new(name: String, id_receiver: String, ai_desc: String, payload_type: String, payload: String) -> Self {
         UsecaseMeta {
             name,
             id_receiver,
             payload_type,
             payload: serde_json::from_str(&payload).unwrap(),
+            ai_desc,
         }
     }
 
