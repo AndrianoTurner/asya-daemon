@@ -18,7 +18,7 @@ pub struct UsecaseMeta {
     name: String,
     id_receiver: String, // uuid
     payload_type: String,
-    ai_desc: String,
+    ai_desc: String, // todo: change to hashmap for diff localizations
     payload: serde_json::Value,
 }
 
