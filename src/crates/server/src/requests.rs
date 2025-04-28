@@ -29,11 +29,3 @@ pub enum Requests {
     },
 }
 
-// fn ebra() {
-//     Usecase {
-//         name: "turnOfMusic".to_string(),
-//         id_receiver: "34af02f7-9307-44ec-b8ce-9da247704547".to_string(),
-//         payload_type: "json".to_string(),
-//         payload: serde_json::to_string("uscases").unwrap(),
-//     };
-// }

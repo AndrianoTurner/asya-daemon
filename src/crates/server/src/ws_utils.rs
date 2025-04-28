@@ -74,9 +74,8 @@ async fn handle_request(request: Requests, session: Arc<RwLock<Session>>) {
         Requests::Command { action } => {
             action.execute("".to_string()).await;
         }
-        Requests::Human { message: _message } => {
-            todo!()
-            // usecases::dispatch_by_user_message(message).await;
+        Requests::Human { message } => {
+            usecases::dispatch_by_user_message(message).await;
         }
     }
 }

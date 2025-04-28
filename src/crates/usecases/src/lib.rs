@@ -22,12 +22,7 @@ pub struct UsecaseMeta {
 }
 
 impl UsecaseMeta {
-    pub fn new(
-        name: String,
-        id_receiver: String,
-        payload_type: String,
-        payload: String,
-    ) -> Self {
+    pub fn new(name: String, id_receiver: String, payload_type: String, payload: String) -> Self {
         UsecaseMeta {
             name,
             id_receiver,
@@ -69,48 +64,18 @@ pub async fn subscribe_for_plugins() {
 
 pub async fn dispatch_by_user_message(message: String) {
     let schema = schemars::schema_for!(InternalUsecases);
+    let usecase_json_string = llm_api::send_request(
+        format!(
+        "Translate this userinput \"{}\" into json value following by following json schemes and send me only generated json without any other text. 
+                Generated json will be used as value of existing json object. 
+            If value doesn't have an key return value without brases, but save json syntax please. {}", message, serde_json::to_string(&schema).unwrap()
+        )
+    ).await.unwrap();
 
-    let c_req = format!(
-        "
-            Determine whether the following user input: {} is similar to any of the commands below. 
-            {}
-            If it is similar, respond with a single word: TRUE. 
-            If it is not similar, respond with a single word: FALSE.
-        ",
-        message,
-        serde_json::to_string_pretty(&schema).unwrap()
-    );
-
-    let c_llm_response = llm_api::send_request(c_req).await;
-    let usecase = if c_llm_response.unwrap() == "TRUE" {
-        let g_req = format!(
-            "
-                Generate json representation of command from this user input: {}
-                by this json schema fo available commands: {}
-
-                SEND ME ONLY GENERATED JSON
-
-            ",
-            message,
-            serde_json::to_string_pretty(&schema).unwrap()
-        );
-
-        let g_llm_response = llm_api::send_request(g_req).await;
-
-        if g_llm_response.is_err() {
-            warn!("Error sending request to LLM: {:?}", g_llm_response.err());
-            return;
-        }
-        let llm_response = g_llm_response.unwrap();
-        debug!("LLM RESPONSE: {}", llm_response);
-        let usecase = process_response(&llm_response);
-        if let Err(err) = usecase {
-            warn!("Error parsing response from LLM: {:?}", err);
-            return;
-        }
-        usecase.unwrap()
+    let usecase = if let Ok(u) = serde_json::from_str::<InternalUsecases>(&usecase_json_string) {
+        u
     } else {
-        usecases::InternalUsecases::Answer
+        InternalUsecases::Answer
     };
     usecase.dispatch(message).await;
 }

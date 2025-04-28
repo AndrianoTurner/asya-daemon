@@ -1,6 +1,5 @@
 use macros::Stringify;
 use serde::{Deserialize, Serialize};
-use tokio::fs;
 
 use crate::scenarios::*;
 
@@ -72,10 +71,6 @@ pub enum App {
 impl InternalUsecases {
     pub async fn dispatch(self, userinput: String) {
         let command = self;
-        let schema = schemars::schema_for!(InternalUsecases);
-        let scheme_string = serde_json::to_string_pretty(&schema).unwrap(); 
-        fs::write("./bebra.json", &scheme_string).await.unwrap();
-        println!("Scheme: {}", scheme_string);
         match command {
             InternalUsecases::TurnOffMusic | InternalUsecases::TurnOnMusic => {
                 music_control::play_or_resume_music(userinput).await;

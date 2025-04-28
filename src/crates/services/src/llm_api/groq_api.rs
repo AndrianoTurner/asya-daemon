@@ -28,7 +28,7 @@ async fn construct_and_send_request(
             }
         ],
         "model": "llama-3.3-70b-versatile",
-        "temperature": 0.7
+        "temperature": 0.1
     });
 
     let response = request(client, url, api_key, body).await;
