@@ -55,28 +55,32 @@ pub fn load_plugins(_receiver: Mutex<Receiver<String>>) {
 
         native::load_native_plugin_data(&libraries_path)
             .into_iter()
-            .for_each(|el| {
-                let callback = el.plugin_information.init_callback;
-                let name = CStr::from_ptr(el.plugin_information.name).to_str().unwrap();
-                thread::spawn(move || {
-                    let rt = tokio::runtime::Runtime::new().unwrap();
-                    rt.block_on(async {
-                        let _lib = el._library;
-                        let config = CONFIG
-                            .plugins
-                            .config
-                            .get_key_value(name)
-                            .map(|(_, v)| crate::extract_config_ptr(v))
-                            .unwrap_or(ptr::null_mut())
-                            .cast_const();
-
-                        (callback)(config, api_callbacks::get_api());
-                    })
-                });
+            .for_each(|native_plugin| {
+                load_native(native_plugin);
             });
 
         let _dotnet_plugins_data = dotnet::load_dotnet_plugin_data(&libraries_path);
     };
+}
+
+unsafe fn load_native(el: native::NativePluginRuntimeInfo) {
+    let callback = el.plugin_information.init_callback;
+    let name = CStr::from_ptr(el.plugin_information.name).to_str().unwrap();
+    thread::spawn(move || {
+        let rt = tokio::runtime::Runtime::new().unwrap();
+        rt.block_on(async {
+            let _lib = el._library;
+            let config = CONFIG
+                .plugins
+                .config
+                .get_key_value(name)
+                .map(|(_, v)| crate::extract_config_ptr(v))
+                .unwrap_or(ptr::null_mut())
+                .cast_const();
+
+            (callback)(config, api_callbacks::get_api());
+        })
+    });
 }
 
 /// Finds plugins for user's OS and returs their pathes.

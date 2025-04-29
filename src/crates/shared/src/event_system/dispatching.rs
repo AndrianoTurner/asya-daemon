@@ -83,6 +83,7 @@ impl AsyncEventDispatcher {
                 handler(cloned_event).await.unwrap();
             }
         }
+
         debug!("Publishing event: {} - {:?}", event_type, event);
 
         let lock = self.sender.write().await;
@@ -90,10 +91,10 @@ impl AsyncEventDispatcher {
 
         let (tx, _) = crate::event_system::get_channel().await;
         tx.send(
-            serde_json::to_string(&dbg!(ForPluginWrapper {
+            serde_json::to_string(&ForPluginWrapper {
                 event_name: event_type.split("::").last().unwrap().to_string(),
                 event_body: &*event,
-            }))
+            })
             .unwrap(),
         )
         .unwrap();

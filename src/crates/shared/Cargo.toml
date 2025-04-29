@@ -23,6 +23,7 @@ http-body-util = "0.1.2"
 mlua = { version = "*", features = ["luajit"] }
 mlua_serde = "*"
 
+dashmap = "*"
 serde_yaml = "0.9.34"
 homedir = "0.3.4"
 tower = "0.4.13"
