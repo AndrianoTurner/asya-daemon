@@ -1,10 +1,7 @@
 use crate::api_callbacks;
 
 use super::FoundedPlugin;
-use netcorehost::{
-    nethost, pdcstr,
-    pdcstring::PdCString,
-};
+use netcorehost::{nethost, pdcstr, pdcstring::PdCString};
 use plugin_interface::ApiCallbacksMap;
 
 pub struct DotnetRuntimePluginInfo {}
@@ -30,13 +27,14 @@ pub(crate) fn load_dotnet_plugin_data(
                 )
                 .unwrap();
 
-            let hello_world3 = delegate_loader
+            let entry_point = delegate_loader
                 .get_function_with_unmanaged_callers_only::<fn(bebra: *const ApiCallbacksMap)>(
                     pdcstr!("AsyaDotnetPlugin.Program, AsyaDotnetPlugin"),
                     pdcstr!("Run"),
                 )
                 .unwrap();
-            unsafe { hello_world3(Box::into_raw(Box::new(api_callbacks::get_api()))) };
+
+            entry_point(Box::into_raw(Box::new(api_callbacks::get_api())));
         }
     }
     vec![]

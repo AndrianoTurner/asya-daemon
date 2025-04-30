@@ -8,7 +8,7 @@ use crate::{event_system, ReadableRequest};
 
 use super::abstractions;
 
-pub unsafe fn get_api() -> ApiCallbacksMap {
+pub fn get_api() -> ApiCallbacksMap {
     let callbacks = vec![
         ApiCallbacksPair::new("send_human_request", send_human_request as *const c_void),
         ApiCallbacksPair::new("subscribe_to_events", subscribe_to_events as *const c_void),
