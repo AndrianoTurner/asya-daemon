@@ -9,10 +9,10 @@ use crate::scenarios::*;
 #[derive(Debug, Stringify, serde::Serialize, serde::Deserialize, schemars::JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub enum InternalUsecases {
-    #[schemars(description = "Turns off the music playback")]
+    #[schemars(description = "Turns off the music playback. Pause music.")]
     TurnOffMusic,
 
-    #[schemars(description = "Turns on the music playback")]
+    #[schemars(description = "Turns on the music playback. Plays music. Returns Music.")]
     TurnOnMusic,
 
     #[schemars(description = "Retrieves the current music playback status")]

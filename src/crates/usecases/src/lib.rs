@@ -44,13 +44,6 @@ impl UsecaseMeta {
     }
 }
 
-// fn process_response(llm_response: &str) -> Result<InternalUsecases, Box<dyn std::error::Error>> {
-//     let llm_response = llm_response.replace("`json", "");
-//     let llm_response = llm_response.replace("`", "");
-//     let usecase = serde_json::from_str::<InternalUsecases>(&llm_response.clone())?;
-//     Ok(usecase)
-// }
-//
 pub async fn subscribe_for_plugins() {
     event_system::subscribe_once({
         move |event: Arc<ReadableRequest>| {
@@ -66,12 +59,21 @@ pub async fn dispatch_by_user_message(message: String) {
     let schema = schemars::schema_for!(InternalUsecases);
     if let Ok(usecase_json_string) = llm_api::send_request(
         format!(
-        "Translate this userinput \"{}\" into json value following by following json schemes and send me only generated json without any other text. 
-                Generated json will be used as value of existing json object. 
-            If value doesn't have an key return value without brases, but save json syntax please. {}", message, serde_json::to_string(&schema).unwrap()
+            "Translate the user input stored in the variable USERINPUT into JSON format.
+                You must determine which JSON object corresponds to the user input based on its meaning and the provided JSON schemas of possible JSON objects.
+                You must choose only from the list of JSON objects from JSON Schemes.
+                You must be certain that the schema you choose truly matches the description of the JSON object.
+                You must ensure that the JSON object is valid and conforms to its schema.
+                Provide only correct answers, as incorrect ones could harm people.
+                You must not write curly braces around the resulting JSON object if the object does not represent a key-value pair.
+                SEND ME ONLY RESULT JSON OBJECT WITHOUT ANY TEXT.
+                USERINPUT: {} \n\n
+                JSON Schemes: {}",
+            message,
+            serde_json::to_string(&schema).unwrap()
         )
     ).await {
-        let usecase = serde_json::from_str::<InternalUsecases>(&usecase_json_string)
+        let usecase = dbg!(serde_json::from_str::<InternalUsecases>(&dbg!(usecase_json_string)))
             .unwrap_or(InternalUsecases::Answer);
         usecase.dispatch(message).await;
     };
