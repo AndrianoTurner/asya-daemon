@@ -59,8 +59,31 @@ pub fn load_plugins(_receiver: Mutex<Receiver<String>>) {
                 load_native(native_plugin);
             });
 
-        let _dotnet_plugins_data = dotnet::load_dotnet_plugin_data(&libraries_path);
+        dotnet::load_dotnet_plugin_data(&libraries_path)
+            .into_iter()
+            .for_each(|managed_plugin| {
+                load_managed(managed_plugin);
+            });
     };
+}
+
+unsafe fn load_managed(info: dotnet::DotnetRuntimePluginInfo) {
+    let callback = info.entry_point;
+    let name = info.name;
+    thread::spawn(move || {
+        let rt = tokio::runtime::Runtime::new().unwrap();
+        rt.block_on(async {
+            let config = CONFIG
+                .plugins
+                .config
+                .get_key_value(&name)
+                .map(|(_, v)| crate::extract_config_ptr(v))
+                .unwrap_or(ptr::null_mut())
+                .cast_const();
+
+            (callback)(config, Box::into_raw(Box::new(api_callbacks::get_api())));
+        })
+    });
 }
 
 unsafe fn load_native(el: native::NativePluginRuntimeInfo) {

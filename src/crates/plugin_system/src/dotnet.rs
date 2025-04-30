@@ -1,14 +1,18 @@
-use crate::api_callbacks;
+use std::ffi::c_char;
 
 use super::FoundedPlugin;
-use netcorehost::{nethost, pdcstr, pdcstring::PdCString};
+use netcorehost::{hostfxr::ManagedFunction, nethost, pdcstr, pdcstring::PdCString};
 use plugin_interface::ApiCallbacksMap;
 
-pub struct DotnetRuntimePluginInfo {}
+pub struct DotnetRuntimePluginInfo {
+    pub name: String,
+    pub entry_point: ManagedFunction<extern "system" fn(*const c_char, *const ApiCallbacksMap)>,
+}
 
 pub(crate) fn load_dotnet_plugin_data(
     libraries_path: &[FoundedPlugin],
 ) -> Vec<DotnetRuntimePluginInfo> {
+    let mut res = Vec::with_capacity(libraries_path.len());
     for lib in libraries_path {
         if let FoundedPlugin::Dotnet {
             dll_path,
@@ -28,14 +32,17 @@ pub(crate) fn load_dotnet_plugin_data(
                 .unwrap();
 
             let entry_point = delegate_loader
-                .get_function_with_unmanaged_callers_only::<fn(bebra: *const ApiCallbacksMap)>(
+                .get_function_with_unmanaged_callers_only::<fn(config: *const c_char, callbacks: *const ApiCallbacksMap)>(
                     pdcstr!("AsyaDotnetPlugin.Program, AsyaDotnetPlugin"),
                     pdcstr!("Run"),
                 )
                 .unwrap();
 
-            entry_point(Box::into_raw(Box::new(api_callbacks::get_api())));
+            res.push(DotnetRuntimePluginInfo {
+                name: dll_path.file_name().unwrap().to_str().unwrap().to_string(),
+                entry_point,
+            });
         }
     }
-    vec![]
+    res
 }
