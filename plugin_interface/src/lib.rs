@@ -42,9 +42,8 @@ impl Default for State {
 #[derive(Debug)]
 pub struct NativePluginInformation {
     pub name: *const c_char,
-    // pub event_callback: EventCallbalck,
     pub init_callback: InitCallback,
-    // pub execute_callback: ExecuteCallback,
+    pub options: *const PluginOption,
 }
 
 #[repr(C)]
@@ -107,6 +106,12 @@ impl ApiCallbacksMap {
         }
         ptr::null()
     }
+}
+
+#[repr(C)]
+pub struct PluginOption {
+    name: *const c_char,
+    value: *const c_void,
 }
 
 #[repr(C)]
