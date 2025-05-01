@@ -48,14 +48,14 @@ pub struct NativePluginInformation {
 
 #[repr(C)]
 pub struct ApiCallbacksMap {
-    callbacks: *const ApiCallbacksPair,
+    callbacks: *const ApiCallback,
     callbacks_len: c_uint,
 }
 
 impl fmt::Debug for ApiCallbacksMap {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         unsafe {
-            let slice: &[ApiCallbacksPair] =
+            let slice: &[ApiCallback] =
                 slice::from_raw_parts(self.callbacks, self.callbacks_len as usize);
 
             let mut debug_struct = f.debug_struct("ApiCallbacksMap");
@@ -63,7 +63,7 @@ impl fmt::Debug for ApiCallbacksMap {
 
             let mut callbacks_info = Vec::new();
             for el in slice {
-                let name = match CStr::from_ptr(el.callback_name).to_str() {
+                let name = match CStr::from_ptr(el.name).to_str() {
                     Ok(name) => name.to_string(),
                     Err(_) => "<invalid UTF-8>".to_string(),
                 };
@@ -82,7 +82,7 @@ impl fmt::Debug for ApiCallbacksMap {
 }
 
 impl ApiCallbacksMap {
-    pub fn new(callbacks: Vec<ApiCallbacksPair>) -> Self {
+    pub fn new(callbacks: Vec<ApiCallback>) -> Self {
         let leaked = Box::leak(callbacks.into_boxed_slice());
         Self {
             callbacks_len: leaked.len() as u32,
@@ -94,7 +94,7 @@ impl ApiCallbacksMap {
     pub unsafe fn callback(&self, name: &str) -> *const c_void {
         for i in 0..self.callbacks_len {
             let current = self.callbacks.add(i as usize);
-            let c_name = match CStr::from_ptr((*current).callback_name).to_str() {
+            let c_name = match CStr::from_ptr((*current).name).to_str() {
                 Ok(name) => name,
                 Err(_) => continue,
             };
@@ -115,15 +115,15 @@ pub struct PluginOption {
 }
 
 #[repr(C)]
-pub struct ApiCallbacksPair {
-    callback_name: *const c_char,
+pub struct ApiCallback {
+    name: *const c_char,
     callback: *const c_void,
 }
 
-impl ApiCallbacksPair {
+impl ApiCallback {
     pub fn new(name: &str, c_ptr: *const c_void) -> Self {
         Self {
-            callback_name: CString::from_str(name).unwrap().into_raw(),
+            name: CString::from_str(name).unwrap().into_raw(),
             callback: c_ptr,
         }
     }

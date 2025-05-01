@@ -6,7 +6,7 @@ edition.workspace = true
 [dependencies]
 shared = { path = "../shared/" }
 macros = { path = "../macros/" }
-plugin_interface = { path = "../../../plugin_interface/" }
+plugin_api.path = "../../../plugin_api/"
 
 libloading = "0.8.6"
 tracing = "0.1"

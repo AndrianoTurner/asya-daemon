@@ -1,5 +1,5 @@
 use lazy_static::lazy_static;
-use plugin_interface::{ApiCallbacksMap, ApiCallbacksPair};
+use plugin_api::{ApiCallbacksMap, ApiCallback};
 use std::ffi::{c_char, c_void, CString};
 
 use tracing::*;
@@ -10,9 +10,9 @@ use super::abstractions;
 
 pub fn get_api() -> ApiCallbacksMap {
     let callbacks = vec![
-        ApiCallbacksPair::new("send_human_request", send_human_request as *const c_void),
-        ApiCallbacksPair::new("subscribe_to_events", subscribe_to_events as *const c_void),
-        ApiCallbacksPair::new("publish_event", publish_event as *const c_void),
+        ApiCallback::new("send_human_request", send_human_request as *const c_void),
+        ApiCallback::new("subscribe_to_events", subscribe_to_events as *const c_void),
+        ApiCallback::new("publish_event", publish_event as *const c_void),
     ];
 
     ApiCallbacksMap::new(callbacks)

@@ -2176,7 +2176,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "plugin_interface"
+name = "plugin_api"
 version = "0.1.0"
 
 [[package]]
@@ -2188,7 +2188,7 @@ dependencies = [
  "libloading",
  "macros",
  "netcorehost",
- "plugin_interface",
+ "plugin_api",
  "serde",
  "serde_json",
  "shared",
@@ -2879,7 +2879,7 @@ dependencies = [
  "mlua",
  "mlua_serde",
  "multimap",
- "plugin_interface",
+ "plugin_api",
  "queues",
  "rand",
  "serde",

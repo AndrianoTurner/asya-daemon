@@ -5,7 +5,7 @@ use tracing::*;
 
 use libloading::Library;
 
-use plugin_interface::NativePluginInformation;
+use plugin_api::NativePluginInformation;
 use tracing::warn;
 
 use crate::FoundedPlugin;
@@ -30,7 +30,7 @@ pub unsafe fn load_native_plugin_data(libs: &[FoundedPlugin]) -> Vec<NativePlugi
                 }
             };
             let plugin_information_callback = match library
-                .get::<*mut plugin_interface::NativePluginInfoCallback>(FN_PLUGIN_INFO)
+                .get::<*mut plugin_api::NativePluginInfoCallback>(FN_PLUGIN_INFO)
             {
                 Ok(callback) => callback.read(),
                 Err(err) => {

@@ -2,7 +2,7 @@ use std::ffi::c_char;
 
 use super::FoundedPlugin;
 use netcorehost::{hostfxr::ManagedFunction, nethost, pdcstr, pdcstring::PdCString};
-use plugin_interface::ApiCallbacksMap;
+use plugin_api::ApiCallbacksMap;
 
 pub struct DotnetRuntimePluginInfo {
     pub name: String,
