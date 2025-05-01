@@ -87,7 +87,7 @@ unsafe fn load_managed(info: dotnet::DotnetRuntimePluginInfo) {
 }
 
 unsafe fn load_native(el: native::NativePluginRuntimeInfo) {
-    let callback = el.plugin_information.init_callback;
+    let callback = el.plugin_information.entrypoint;
     let name = CStr::from_ptr(el.plugin_information.name).to_str().unwrap();
     thread::spawn(move || {
         let rt = tokio::runtime::Runtime::new().unwrap();
