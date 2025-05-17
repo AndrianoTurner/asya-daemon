@@ -1,5 +1,5 @@
 use lazy_static::lazy_static;
-use plugin_api::{ApiCallbacksMap, ApiCallback};
+use plugin_api::{ApiCallback, ApiCallbacksMap};
 use std::ffi::{c_char, c_void, CString};
 
 use tracing::*;

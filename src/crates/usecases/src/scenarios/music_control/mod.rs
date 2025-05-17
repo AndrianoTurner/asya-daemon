@@ -2,7 +2,7 @@ use crate::tools::PromptBuilder;
 use crate::AsyaResponse;
 use services::{
     lexicon::Lexicon,
-    services::commands::music::{self, MediaPlayingStatus},
+    services::commands::music::{self},
 };
 use shared::{event_system, traits::Beautify};
 
@@ -18,6 +18,7 @@ use shared::{event_system, traits::Beautify};
 ///
 /// # Events
 ///     * [`AsyaResponse::Ok`] - if music was paused or resumed.
+#[cfg(target_family = "unix")]
 pub async fn play_or_resume_music(executed_command: String) {
     let music_status = music::get_status();
     music::play_pause();
@@ -57,6 +58,7 @@ pub async fn play_or_resume_music(executed_command: String) {
 ///
 /// Events:
 ///     * [`AsyaResponse::Ok`] - message will be contain the current status of the music player.
+#[cfg(target_family = "unix")]
 pub async fn get_music_status(userinput: String) {
     let music_status = music::get_status();
     match music_status {
@@ -91,6 +93,7 @@ async fn publish_music_status(status: music::TrackInfo, userinput: &str) {
 /// Plays the next track in the playlist.
 /// # Events
 ///     * [`AsyaResponse::Ok`] - message will contain the result of the operation.
+#[cfg(target_family = "unix")]
 pub async fn play_next_track(_: String) {
     music::play_next();
 
@@ -108,6 +111,8 @@ pub async fn play_next_track(_: String) {
 /// Plays the next track in the playlist.
 /// # Events
 ///     * [`AsyaResponse::Ok`] - message will contain the result of the operation.
+
+#[cfg(target_family = "unix")]
 pub(crate) async fn play_previous_track(_: String) {
     music::play_prev();
 

@@ -1,10 +1,9 @@
-use std::fmt;
 use std::error::Error as StdError;
+use std::fmt;
 use std::result::Result as StdResult;
 
-use serde;
 use mlua::Error as LuaError;
-
+use serde;
 
 #[derive(Debug)]
 pub struct Error(LuaError);
@@ -38,9 +37,9 @@ impl StdError for Error {
 impl serde::ser::Error for Error {
     fn custom<T: fmt::Display>(msg: T) -> Self {
         Error(LuaError::ToLuaConversionError {
-            from: "serialize",
+            from: "serialize".to_owned(),
             to: "value",
-            message: Some(format!("{}", msg))
+            message: Some(format!("{}", msg)),
         })
     }
 }
@@ -49,8 +48,8 @@ impl serde::de::Error for Error {
     fn custom<T: fmt::Display>(msg: T) -> Self {
         Error(LuaError::FromLuaConversionError {
             from: "value",
-            to: "deserialize",
-            message: Some(format!("{}", msg))
+            to: "deserialize".to_owned(),
+            message: Some(format!("{}", msg)),
         })
     }
 }

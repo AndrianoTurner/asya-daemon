@@ -1,6 +1,4 @@
-use std::
-    ffi::CStr
-;
+use std::ffi::CStr;
 use tracing::*;
 
 use libloading::Library;
