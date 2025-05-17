@@ -106,4 +106,4 @@ tonic-build = "0.12.1"
 
 
 [features]
-dotnet = []
+dotnet = ["plugin_system/dotnet"]
