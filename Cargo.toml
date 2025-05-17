@@ -52,6 +52,7 @@ ctrlc = {version = "*"}
 regex = { version = "*"}
 async-trait = "0.1.83"
 libloading = "0.8.6"
+
 [dependencies]
 server = { path = "src/crates/server" }
 services = { path = "src/crates/services" }
@@ -102,3 +103,7 @@ debug = true
 
 [build-dependencies]
 tonic-build = "0.12.1"
+
+
+[features]
+dotnet = []
