@@ -38,7 +38,7 @@ impl StdError for Error {
 impl serde::ser::Error for Error {
     fn custom<T: fmt::Display>(msg: T) -> Self {
         Error(LuaError::ToLuaConversionError {
-            from: "serialize",
+            from: "serialize".to_owned(),
             to: "value",
             message: Some(format!("{}", msg))
         })
@@ -49,7 +49,7 @@ impl serde::de::Error for Error {
     fn custom<T: fmt::Display>(msg: T) -> Self {
         Error(LuaError::FromLuaConversionError {
             from: "value",
-            to: "deserialize",
+            to: "deserialize".to_owned(),
             message: Some(format!("{}", msg))
         })
     }
