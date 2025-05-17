@@ -72,14 +72,23 @@ impl InternalUsecases {
     pub async fn dispatch(self, userinput: String) {
         let command = self;
         match command {
+            
             InternalUsecases::TurnOffMusic | InternalUsecases::TurnOnMusic => {
+                #[cfg(target_family = "unix")]
                 music_control::play_or_resume_music(userinput).await;
             }
             InternalUsecases::GetMusicStatus => {
+                #[cfg(target_family = "unix")]
                 music_control::get_music_status(userinput).await;
             }
-            InternalUsecases::PlayNextTrack => music_control::play_next_track(userinput).await,
-            InternalUsecases::PlayPrevTrack => music_control::play_previous_track(userinput).await,
+            InternalUsecases::PlayNextTrack => {
+                #[cfg(target_family = "unix")]
+                music_control::play_next_track(userinput).await
+            },
+            InternalUsecases::PlayPrevTrack => {
+                #[cfg(target_family = "unix")]
+                music_control::play_previous_track(userinput).await
+            },
             InternalUsecases::StartBasicSystemMonitoring => {
                 system_monitoring::start_basic_monitoring(userinput).await
             }
