@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-use shared::{shell, traits::Beautify};
+use shared::traits::Beautify;
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct TrackInfo {

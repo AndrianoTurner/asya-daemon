@@ -2,7 +2,7 @@ use crate::tools::PromptBuilder;
 use crate::AsyaResponse;
 use services::{
     lexicon::Lexicon,
-    services::commands::music::{self, MediaPlayingStatus},
+    services::commands::music::{self},
 };
 use shared::{event_system, traits::Beautify};
 

@@ -7,10 +7,10 @@ use std::{collections::HashMap, fmt::Debug};
 use crate::types::AiRecognizeMethod;
 use homedir::my_home;
 use lazy_static::lazy_static;
-use mlua::{IntoLua, Lua, LuaSerdeExt, Table, Value};
+use mlua::{Lua, LuaSerdeExt, Value};
 
 lazy_static! {
-    pub static ref CONFIG: Config = { load_config() };
+    pub static ref CONFIG: Config = load_config();
 }
 
 // I hate no LSP support in macros
