@@ -6,7 +6,8 @@ use std::{
 use super::FoundedPlugin;
 use netcorehost::{
     hostfxr::ManagedFunction,
-    nethost, pdcstring::{other::PdCStrExt, PdCStr, PdCString},
+    nethost,
+    pdcstring::{other::PdCStrExt, PdCStr, PdCString},
 };
 use plugin_api::ApiCallbacksMap;
 use serde::de::Error;

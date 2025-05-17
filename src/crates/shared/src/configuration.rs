@@ -10,42 +10,38 @@ use lazy_static::lazy_static;
 use mlua::{IntoLua, Lua, LuaSerdeExt, Table, Value};
 
 lazy_static! {
-    pub static ref CONFIG: Config = {
-        load_config()
-    };
+    pub static ref CONFIG: Config = { load_config() };
 }
 
-
-// I hate no LSP support in macros 
+// I hate no LSP support in macros
 fn load_config() -> Config {
-     let config_path = vec![format!(
-            "{}/.config/asya/config.lua",
-            my_home().unwrap().unwrap().to_str().unwrap().to_string()
-        )];
+    let config_path = vec![format!(
+        "{}/.config/asya/config.lua",
+        my_home().unwrap().unwrap().to_str().unwrap().to_string()
+    )];
 
-        let lua_config = {
-            if let Some((_config_path, lua_file_content)) = load_any_file(config_path) {
-                let lua = Lua::new();
+    let lua_config = {
+        if let Some((_config_path, lua_file_content)) = load_any_file(config_path) {
+            let lua = Lua::new();
 
-                let config_lua: Value = lua
-                    .load(&lua_file_content)
-                    .eval()
-                    .expect("Lua configuration file must be correct to evaluate");
+            let config_lua: Value = lua
+                .load(&lua_file_content)
+                .eval()
+                .expect("Lua configuration file must be correct to evaluate");
 
-                let config_prop: ConfigProperty = lua.from_value(config_lua).unwrap();
-                config_prop
-            } else {
-                ConfigProperty::default()
-            }
-        };
+            let config_prop: ConfigProperty = lua.from_value(config_lua).unwrap();
+            config_prop
+        } else {
+            ConfigProperty::default()
+        }
+    };
 
-        let merged_config = lua_config.merge(serde_env::from_env().unwrap());
-        merged_config.verify().unwrap();
-        merged_config.unwrap_or_default()
+    let merged_config = lua_config.merge(serde_env::from_env().unwrap());
+    merged_config.verify().unwrap();
+    merged_config.unwrap_or_default()
 }
 
 pub fn load_any_file(pathes: Vec<String>) -> Option<(String, String)> {
-    
     pathes.into_iter().find_map(|path| {
         std::fs::read_to_string(&path)
             .map(|content| (path, content))

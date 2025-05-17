@@ -1,8 +1,8 @@
 pub mod configuration;
-pub mod traits;
-pub mod types;
-pub mod shell;
+pub mod error;
+pub mod event_system;
 pub mod llm;
 pub mod serde_extensions;
-pub mod event_system;
-pub mod error;
+pub mod shell;
+pub mod traits;
+pub mod types;

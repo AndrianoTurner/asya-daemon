@@ -19,7 +19,6 @@ use shared::{
 mod abstractions;
 mod api_callbacks;
 
-
 #[cfg(feature = "dotnet")]
 mod dotnet;
 mod native;
@@ -60,7 +59,7 @@ pub fn load_plugins(_receiver: Mutex<Receiver<String>>) {
             .for_each(|native_plugin| {
                 load_native(native_plugin);
             });
-    #[cfg(feature = "dotnet")]
+        #[cfg(feature = "dotnet")]
         dotnet::load_dotnet_plugin_data(&libraries_path)
             .into_iter()
             .for_each(|managed_plugin| {
