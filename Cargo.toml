@@ -61,7 +61,7 @@ usecases = { path = "src/crates/usecases" }
 plugin_system = { path = "src/crates/plugin_system" }
 
 tracing = {workspace = true}
-tracing-subscriber = {workspace = true}
+tracing-subscriber = {workspace = true, features = ["env-filter"]}
 tracing-appender = {workspace = true}
 
 ctrlc = {workspace = true}
