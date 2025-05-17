@@ -26,7 +26,7 @@
   ![Badge Hi Mom]
   ![Badge Language]
   ![Badge License]
-  [![channel icon](https://patrolavia.github.io/telegram-badge/follow.png)](https://t.me/asya_sillyblog)
+  [![channel icon](https://patrolavia.github.io/telegram-badge/follow.png)](https://t.me/asya_devs)
   
   **[<kbd> <br> Report Bug <br> </kbd>][Bug]**
   **[<kbd> <br> Request Feature <br> </kbd>][Feature]**
