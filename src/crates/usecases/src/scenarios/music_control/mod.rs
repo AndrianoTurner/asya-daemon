@@ -1,5 +1,7 @@
 use crate::tools::PromptBuilder;
 use crate::AsyaResponse;
+#[cfg(target_family = "unix")]
+use services::llm_api::LlmBackend;
 use services::services::commands::music::MediaPlayingStatus;
 use services::{
     lexicon::Lexicon,
@@ -20,7 +22,7 @@ use shared::{event_system, traits::Beautify};
 /// # Events
 ///     * [`AsyaResponse::Ok`] - if music was paused or resumed.
 #[cfg(target_family = "unix")]
-pub async fn play_or_resume_music(executed_command: String) {
+pub async fn play_or_resume_music(api: impl LlmBackend, executed_command: String) {
     use services::services::commands::music::MediaPlayingStatus;
 
     let music_status = music::get_status();
@@ -32,7 +34,7 @@ pub async fn play_or_resume_music(executed_command: String) {
                 .set_path("/telegram/music/resume")
                 .set_variable("{command}", executed_command.as_str())
                 .set_fallback_phrase(Lexicon::MusicResume)
-                .get_result()
+                .get_result(api)
                 .await;
 
             event_system::publish(AsyaResponse::Ok {
@@ -45,7 +47,7 @@ pub async fn play_or_resume_music(executed_command: String) {
                 .set_path("/telegram/music/pause")
                 .set_variable("{command}", executed_command.as_str())
                 .set_fallback_phrase(Lexicon::MusicPause)
-                .get_result()
+                .get_result(api)
                 .await;
 
             event_system::publish(AsyaResponse::Ok {
@@ -62,29 +64,29 @@ pub async fn play_or_resume_music(executed_command: String) {
 /// Events:
 ///     * [`AsyaResponse::Ok`] - message will be contain the current status of the music player.
 #[cfg(target_family = "unix")]
-pub async fn get_music_status(userinput: String) {
+pub async fn get_music_status(api: impl LlmBackend, userinput: String) {
     let music_status = music::get_status();
     match music_status {
         // MediaPlayingStatus::Stopped => Lexicon::MusicStopped.describe().to_string(),
         MediaPlayingStatus::Stopped => (),
         MediaPlayingStatus::Paused(status) => {
-            publish_music_status(status, &userinput).await;
+            publish_music_status(api, status, &userinput).await;
         }
         MediaPlayingStatus::Playing(status) => {
-            publish_music_status(status, &userinput).await;
+            publish_music_status(api, status, &userinput).await;
         }
         // MediaPlayingStatus::Unknown => Lexicon::MusicStopped.describe().to_string(),
         MediaPlayingStatus::Unknown => (),
     };
 }
 
-async fn publish_music_status(status: music::TrackInfo, userinput: &str) {
+async fn publish_music_status(api: impl LlmBackend, status: music::TrackInfo, userinput: &str) {
     let res = PromptBuilder::new()
         .set_path("/telegram/music/status")
         .set_variable("{status}", status.beautiful_out().as_str())
         .set_variable("{message}", userinput)
         .set_fallback_phrase(Lexicon::ExecuteSuccess)
-        .get_result()
+        .get_result(api)
         .await;
 
     event_system::publish(AsyaResponse::Ok {
@@ -97,12 +99,12 @@ async fn publish_music_status(status: music::TrackInfo, userinput: &str) {
 /// # Events
 ///     * [`AsyaResponse::Ok`] - message will contain the result of the operation.
 #[cfg(target_family = "unix")]
-pub async fn play_next_track(_: String) {
+pub async fn play_next_track(api: impl LlmBackend, _: String) {
     music::play_next();
 
     let res = PromptBuilder::new()
         .set_fallback_phrase(Lexicon::ExecuteSuccess)
-        .get_result()
+        .get_result(api)
         .await;
 
     event_system::publish(AsyaResponse::Ok {
@@ -116,12 +118,12 @@ pub async fn play_next_track(_: String) {
 ///     * [`AsyaResponse::Ok`] - message will contain the result of the operation.
 
 #[cfg(target_family = "unix")]
-pub(crate) async fn play_previous_track(_: String) {
+pub(crate) async fn play_previous_track(api: impl LlmBackend, _: String) {
     music::play_prev();
 
     let res = PromptBuilder::new()
         .set_fallback_phrase(Lexicon::ExecuteSuccess)
-        .get_result()
+        .get_result(api)
         .await;
 
     event_system::publish(AsyaResponse::Ok {

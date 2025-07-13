@@ -1,5 +1,6 @@
 use macros::Stringify;
 use serde::{Deserialize, Serialize};
+use services::llm_api::LlmBackend;
 
 use crate::scenarios::*;
 
@@ -69,32 +70,32 @@ pub enum App {
 }
 
 impl InternalUsecases {
-    pub async fn dispatch(self, userinput: String) {
+    pub async fn dispatch(self, api: &impl LlmBackend, userinput: String) {
         let command = self;
         match command {
             InternalUsecases::TurnOffMusic | InternalUsecases::TurnOnMusic => {
                 #[cfg(target_family = "unix")]
-                music_control::play_or_resume_music(userinput).await;
+                music_control::play_or_resume_music(api, userinput).await;
             }
             InternalUsecases::GetMusicStatus => {
                 #[cfg(target_family = "unix")]
-                music_control::get_music_status(userinput).await;
+                music_control::get_music_status(api, userinput).await;
             }
             InternalUsecases::PlayNextTrack =>
             {
                 #[cfg(target_family = "unix")]
-                music_control::play_next_track(userinput).await
+                music_control::play_next_track(api, userinput).await
             }
             InternalUsecases::PlayPrevTrack =>
             {
                 #[cfg(target_family = "unix")]
-                music_control::play_previous_track(userinput).await
+                music_control::play_previous_track(api, userinput).await
             }
             InternalUsecases::StartBasicSystemMonitoring => {
                 system_monitoring::start_basic_monitoring(userinput).await
             }
             InternalUsecases::Open { app_kind } => open::open(app_kind).await,
-            InternalUsecases::Answer => geranal_answer::answer(userinput).await,
+            InternalUsecases::Answer => geranal_answer::answer(api, userinput).await,
         }
     }
 }

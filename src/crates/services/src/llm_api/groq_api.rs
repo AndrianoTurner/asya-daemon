@@ -2,6 +2,8 @@ use reqwest::Client;
 use serde_json::json;
 use shared::{configuration::CONFIG, serde_extensions::get_json_value};
 
+use crate::llm_api::LlmBackend;
+
 use super::{request, AiRequestError};
 
 pub async fn send_to_groq(req: String) -> Result<String, AiRequestError> {
@@ -38,4 +40,11 @@ async fn construct_and_send_request(
         "/choices/0/message/content",
     )
     // .map(|s| s.replace("\\", ""))
+}
+pub struct GroqBackend;
+#[async_trait::async_trait]
+impl LlmBackend for GroqBackend {
+    async fn request(&self, request: String) -> Result<String, AiRequestError> {
+        send_to_groq(request).await
+    }
 }

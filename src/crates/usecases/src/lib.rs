@@ -1,9 +1,9 @@
 use crate::usecases::InternalUsecases;
 use plugin_system::ReadableRequest;
 use serde::{Deserialize, Serialize};
-use services::llm_api;
+use services::llm_api::{self, LlmBackend};
 use shared::event_system;
-use std::sync::Arc;
+use std::{ops::Deref, sync::Arc};
 use tokio::task;
 use tracing::*;
 
@@ -31,11 +31,11 @@ impl UsecaseMeta {
         }
     }
 
-    pub async fn execute(self, message: String) {
+    pub async fn execute(self, api: impl LlmBackend, message: String) {
         if self.id_receiver == "asya-daemon" {
             match serde_json::from_value::<InternalUsecases>(self.payload.clone()) {
                 Ok(usecase_internal) => {
-                    usecase_internal.dispatch(message).await;
+                    usecase_internal.dispatch(api, message).await;
                 }
                 Err(err) => warn!("Error parsing usecase: {:?}", err),
             }
@@ -44,20 +44,22 @@ impl UsecaseMeta {
     }
 }
 
-pub async fn subscribe_for_plugins() {
+pub async fn subscribe_for_plugins(api: Arc<impl LlmBackend + 'static>) {
+    let api = api.clone();
     event_system::subscribe_once({
         move |event: Arc<ReadableRequest>| {
+            let api = api.clone();
             task::spawn(async move {
-                dispatch_by_user_message(event.request.clone()).await;
+                dispatch_by_user_message(api, event.request.clone()).await;
             })
         }
     })
     .await
 }
 
-pub async fn dispatch_by_user_message(message: String) {
+pub async fn dispatch_by_user_message(api: Arc<impl LlmBackend>, message: String) {
     let schema = schemars::schema_for!(InternalUsecases);
-    if let Ok(usecase_json_string) = llm_api::send_request(
+    if let Ok(usecase_json_string) =api.request(
         format!(
             "Translate the user input stored in the variable USERINPUT into JSON format.
                 You must determine which JSON object corresponds to the user input based on its meaning and the provided JSON schemas of possible JSON objects.
@@ -75,7 +77,7 @@ pub async fn dispatch_by_user_message(message: String) {
     ).await {
         let usecase = dbg!(serde_json::from_str::<InternalUsecases>(&dbg!(usecase_json_string)))
             .unwrap_or(InternalUsecases::Answer);
-        usecase.dispatch(message).await;
+        usecase.dispatch(api,message).await;
     };
 }
 

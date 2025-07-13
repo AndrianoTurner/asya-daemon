@@ -1,8 +1,11 @@
 use alta_s_api::send_to_altas;
+use async_trait::async_trait;
 use groq_api::send_to_groq;
 use reqwest::Client;
 use shared::{configuration::CONFIG, types::AiRecognizeMethod};
 use tracing::*;
+
+use crate::llm_api::{alta_s_api::AltaSBackend, groq_api::GroqBackend};
 
 mod alta_s_api;
 mod groq_api;
@@ -15,21 +18,32 @@ pub enum AiRequestError {
     AltaSUrl,
     AltaSRequest,
 }
-
-// todo: rewrite to result
-/// Returns `None` if token unspecified or ошибка случилась
-pub async fn send_request(req: String) -> Result<String, AiRequestError> {
-    match &CONFIG.ai.recognize_method {
-        AiRecognizeMethod::Groq => {
-            if &CONFIG.ai.groq_token == "NOT" {
-                warn!("GROQ is curently uses for Ai features, but token was not specified.");
-                Err(AiRequestError::GroqRequest)
-            } else {
-                send_to_groq(req).await
-            }
+#[async_trait::async_trait]
+pub trait LlmBackend: Send + Sync {
+    async fn request(&self, request: String) -> Result<String, AiRequestError>;
+}
+pub enum LLMBackendKind {
+    Groq(GroqBackend),
+    AltaS(AltaSBackend),
+}
+#[async_trait]
+impl LlmBackend for LLMBackendKind {
+    async fn request(&self, request: String) -> Result<String, AiRequestError> {
+        match self {
+            LLMBackendKind::Groq(backend) => backend.request(request).await,
+            LLMBackendKind::AltaS(backend) => backend.request(request).await,
         }
-        AiRecognizeMethod::AltaS => send_to_altas(req).await,
-        AiRecognizeMethod::None => Err(AiRequestError::GroqRequest), // nothing for recognize, so just return command
+    }
+}
+
+pub struct LLMApiBuilder;
+impl LLMApiBuilder {
+    pub fn new(backend_type: AiRecognizeMethod) -> Option<LLMBackendKind> {
+        match backend_type {
+            AiRecognizeMethod::Groq => Some(LLMBackendKind::Groq(GroqBackend)),
+            AiRecognizeMethod::AltaS => Some(LLMBackendKind::AltaS(AltaSBackend)),
+            AiRecognizeMethod::None => None,
+        }
     }
 }
 

@@ -1,6 +1,8 @@
 use reqwest::Client;
 use shared::{configuration::CONFIG, serde_extensions::get_json_value};
 
+use crate::llm_api::LlmBackend;
+
 use super::AiRequestError;
 
 pub async fn send_to_altas(req: String) -> Result<String, AiRequestError> {
@@ -21,4 +23,13 @@ async fn construct_and_send_reqwest(req: String, client: Client, url: &str) -> O
         .expect("The AltaS response should be received");
 
     get_json_value(&response.text().await.unwrap(), "/result/answer")
+}
+
+pub struct AltaSBackend;
+
+#[async_trait::async_trait]
+impl LlmBackend for AltaSBackend {
+    async fn request(&self, request: String) -> Result<String, AiRequestError> {
+        send_to_altas(request).await
+    }
 }

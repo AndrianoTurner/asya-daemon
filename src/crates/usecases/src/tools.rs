@@ -1,6 +1,9 @@
 use std::collections::HashMap;
 
-use services::{lexicon::Lexicon, llm_api};
+use services::{
+    lexicon::Lexicon,
+    llm_api::{self, LlmBackend},
+};
 use shared::llm;
 
 /// Builder for creating a human readable response from Asya.
@@ -98,12 +101,12 @@ impl PromptBuilder {
     /// # Returns
     ///
     /// A `String` containing the result of the prompt or the fallback phrase.
-    pub async fn get_result(&self) -> String {
+    pub async fn get_result(&self, api: impl LlmBackend) -> String {
         let mut prompt = llm::get_prompt(self.prompt_path.as_str());
         for (key, value) in &self.varibles {
             prompt = prompt.replace(key, value);
         }
-        let response = llm_api::send_request(prompt).await;
+        let response = api.request(prompt).await;
         response.unwrap_or(self.fallback_phrase.describe().to_string())
     }
 }

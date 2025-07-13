@@ -11,7 +11,11 @@ pub fn route_all() -> App<
         InitError = (),
     >,
 > {
+    let llm = LLMApiBuilder::new(&CONFIG.ai.recognize_method);
+
+    let data = web::Data::new(llm);
     App::new()
+        .app_data(data)
         .wrap(middleware::DefaultHeaders::new().add(("Content-Type", "application/json")))
         .route("/hey", web::get().to(|| async { "bebra" }))
         .route("/sex", web::get().to(|| async { "не было" }))
